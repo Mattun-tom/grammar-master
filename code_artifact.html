@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Master - 英文法並べ替え学習</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #f0f4f8;
+            user-select: none;
+        }
+        .font-fredoka {
+            font-family: 'Fredoka', cursive;
+        }
+        .word-chip {
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            touch-action: manipulation;
+        }
+        .word-chip:active {
+            transform: scale(0.95);
+        }
+        .bounce-short {
+            animation: bounce 0.4s ease infinite alternate;
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-6px); }
+        }
+        .pop-in {
+            animation: popIn 0.25s ease-out forwards;
+        }
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between">
+
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="showUnitSelection()">
+                <div class="bg-indigo-600 text-white p-2 rounded-xl flex items-center justify-center w-10 h-10 shadow-md">
+                    <i class="fa-solid fa-graduation-cap text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-fredoka font-bold text-xl text-indigo-900 leading-none">GrammarMaster</h1>
+                    <p class="text-xs text-slate-500 font-medium">教科書準拠 英文法並べ替え</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button id="sound-toggle" onclick="toggleSound()" class="p-2.5 rounded-full hover:bg-slate-100 text-slate-600 transition" title="効果音のON/OFF">
+                    <i class="fa-solid fa-volume-high text-lg" id="sound-icon"></i>
+                </button>
+                <div id="overall-stats" class="hidden sm:flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1.5 rounded-full border border-amber-200 text-xs font-bold">
+                    <i class="fa-solid fa-trophy text-amber-500"></i>
+                    <span>総クリア: <span id="total-cleared">0</span></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-3xl w-full mx-auto p-4 flex-grow flex flex-col justify-center">
+
+        <!-- 1. UNIT SELECTION SCREEN -->
+        <section id="unit-select-screen" class="space-y-6 py-4">
+            <div class="text-center space-y-2">
+                <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Lessons</span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800">学習する単元を選んでね</h2>
+                <p class="text-slate-500 text-sm">好きな単元を選んで1セット10問の並べ替えに挑戦しよう！</p>
+            </div>
+
+            <!-- Unit List Grid -->
+            <div id="unit-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Units dynamically inserted via JS -->
+            </div>
+        </section>
+
+        <!-- 2. QUIZ SCREEN -->
+        <section id="quiz-screen" class="hidden flex-col gap-6 py-2">
+            <!-- Progress & Stats Bar -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+                <div class="flex justify-between items-center text-sm font-bold text-slate-600">
+                    <span class="flex items-center gap-2">
+                        <button onclick="showUnitSelection()" class="text-slate-400 hover:text-slate-600 mr-1">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <span id="quiz-unit-title" class="text-indigo-600">単元名</span>
+                    </span>
+                    <span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs">
+                        問題 <span id="current-q-num">1</span> / 10
+                    </span>
+                </div>
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="bg-indigo-600 h-full transition-all duration-300 ease-out" style="width: 10%;"></div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 text-center space-y-3 relative overflow-hidden">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Japanese Sentence</div>
+                <h3 id="japanese-text" class="text-lg sm:text-xl font-bold text-slate-800 leading-relaxed">
+                    ここに日本語の出題文が入ります。
+                </h3>
+            </div>
+
+            <!-- Answer Drop Area (Selected Words) -->
+            <div class="space-y-2">
+                <div class="flex justify-between items-center px-2">
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Your Answer</span>
+                    <button onclick="clearAnswer()" class="text-xs text-slate-400 hover:text-rose-500 font-medium flex items-center gap-1 transition">
+                        <i class="fa-solid fa-rotate-left"></i> リセット
+                    </button>
+                </div>
+                <div id="answer-zone" class="min-h-[110px] bg-indigo-50/60 border-2 border-dashed border-indigo-200 rounded-2xl p-3 flex flex-wrap gap-2 items-center justify-start transition-all">
+                    <!-- Selected word chips go here -->
+                </div>
+            </div>
+
+            <!-- Word Pool Area (Available Words) -->
+            <div class="space-y-2">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider px-2">Word Options</span>
+                <div id="word-pool" class="min-h-[100px] bg-white border border-slate-200 rounded-2xl p-4 flex flex-wrap gap-2.5 items-center justify-center shadow-inner">
+                    <!-- Available word chips go here -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-2">
+                <button id="check-btn" onclick="checkAnswer()" disabled class="w-full py-4 bg-indigo-600 disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-indigo-700 text-white font-bold text-lg rounded-2xl shadow-lg hover:shadow-xl transition transform active:scale-[0.99] flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> 答えあわせをする
+                </button>
+            </div>
+        </section>
+
+        <!-- 3. RESULT SCREEN -->
+        <section id="result-screen" class="hidden py-6 space-y-6">
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 text-center space-y-6">
+                <div class="inline-block p-4 bg-amber-100 text-amber-500 rounded-full bounce-short">
+                    <i class="fa-solid fa-trophy text-4xl"></i>
+                </div>
+                
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800">セット完了！お疲れ様でした！</h2>
+                    <p class="text-slate-500 text-sm mt-1" id="result-unit-title">単元名</p>
+                </div>
+
+                <!-- Score Display -->
+                <div class="bg-indigo-50 p-6 rounded-2xl max-w-sm mx-auto space-y-2">
+                    <div class="text-xs font-bold text-indigo-400 uppercase">SCORE</div>
+                    <div class="text-5xl font-black text-indigo-600 font-fredoka">
+                        <span id="final-score">0</span> / 10
+                    </div>
+                    <div id="star-rating" class="text-amber-400 text-xl space-x-1 pt-1">
+                        <!-- Stars generated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                    <button onclick="retryCurrentUnit()" class="py-3 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> もう一度挑戦する
+                    </button>
+                    <button onclick="showUnitSelection()" class="py-3 px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-list"></i> 単元一覧に戻る
+                    </button>
+                </div>
+            </div>
+
+            <!-- Review Breakdown -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-4">
+                <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-check text-indigo-600"></i> 今回の問題と復習
+                </h3>
+                <div id="review-list" class="space-y-4">
+                    <!-- Review items dynamically generated -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Answer Feedback Modal -->
+    <div id="feedback-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
+        <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 space-y-5 shadow-2xl pop-in max-h-[90vh] overflow-y-auto">
+            
+            <!-- Result Badge -->
+            <div id="modal-badge-container" class="flex items-center gap-3">
+                <div id="modal-icon" class="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow">
+                    <!-- Icon dynamically inserted -->
+                </div>
+                <div>
+                    <h3 id="modal-title" class="text-2xl font-black">正解！</h3>
+                    <p id="modal-subtitle" class="text-xs text-slate-500">すばらしい！正しく並べ替えられました。</p>
+                </div>
+            </div>
+
+            <!-- User vs Model Answer Comparison -->
+            <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-sm">
+                <!-- User Answer (Show if incorrect) -->
+                <div id="user-ans-box" class="hidden space-y-1">
+                    <span class="text-xs font-bold text-rose-500 uppercase">あなたの回答:</span>
+                    <p id="modal-user-ans" class="text-slate-700 font-medium line-through decoration-rose-400"></p>
+                </div>
+
+                <!-- Model Answer -->
+                <div class="space-y-1">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-emerald-600 uppercase">模範解答:</span>
+                        <button onclick="speakModelAnswer()" class="text-xs bg-emerald-100 hover:bg-emerald-200 text-emerald-700 font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 transition">
+                            <i class="fa-solid fa-volume-high"></i> 発音を聞く
+                        </button>
+                    </div>
+                    <p id="modal-model-ans" class="text-base sm:text-lg font-bold text-slate-800 leading-snug"></p>
+                </div>
+            </div>
+
+            <!-- Explanation Box -->
+            <div class="bg-indigo-50/70 border border-indigo-100 p-4 rounded-2xl space-y-1.5 text-sm">
+                <div class="font-bold text-indigo-900 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-info text-indigo-500"></i> 解説・ポイント
+                </div>
+                <p id="modal-explanation" class="text-slate-700 leading-relaxed text-xs sm:text-sm">
+                    解説文がここに入ります。
+                </p>
+            </div>
+
+            <!-- Next Question Button -->
+            <button onclick="nextQuestion()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base rounded-2xl shadow-md transition flex items-center justify-center gap-2">
+                <span>次の問題へ</span> <i class="fa-solid fa-arrow-right"></i>
+            </button>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400">
+        <p>&copy; GrammarMaster - 教科書準拠 英文法学習アプリ</p>
+    </footer>
+
+    <script>
+        /* ----------------------------------------------------
+         * GRAMMAR QUESTION DATA STORE (Mapped from Text Data)
+         * ---------------------------------------------------- */
+        const GRAMMAR_UNITS = [
+            {
+                id: 'L1_L3_patterns',
+                title: 'Lesson 1-3: 文型・基本構造',
+                desc: 'SV/SVC/SVO/SVOO/SVOCの基本文型と否定文・疑問文',
+                icon: 'fa-diagram-project',
+                color: 'from-violet-500 to-purple-600',
+                questions: [
+                    {
+                        ja: 'あなたは有名な歌手に似ています。',
+                        en: ['You', 'resemble', 'a', 'famous', 'singer.'],
+                        exp: 'S(You) + V(resemble) + O(a famous singer) の第3文型(SVO)です。resembleは目的語をとる他動詞です。'
+                    },
+                    {
+                        ja: '私のいとこはエンジニアです。',
+                        en: ['My', 'cousin', 'is', 'an', 'engineer.'],
+                        exp: 'S(My cousin) + V(is) + C(an engineer) の第2文型(SVC)です。S = C の関係が成り立ちます。'
+                    },
+                    {
+                        ja: '私たちの歴史の先生はとても若いです。',
+                        en: ['Our', 'history', 'teacher', 'is', 'very', 'young.'],
+                        exp: 'S(Our history teacher) + V(is) + C(very young) の第2文型(SVC)です。'
+                    },
+                    {
+                        ja: '私たちはケンを生徒会長に選んだ。',
+                        en: ['We', 'elected', 'Ken', 'student', 'council', 'president.'],
+                        exp: 'S(We) + V(elected) + O(Ken) + C(student council president) の第5文型(SVOC)です。'
+                    },
+                    {
+                        ja: '私はその犬をタローと名付けた。',
+                        en: ['I', 'named', 'the', 'dog', 'Taro.'],
+                        exp: 'S(I) + V(named) + O(the dog) + C(Taro) の第5文型(SVOC)です。O = Cの関係になります。'
+                    },
+                    {
+                        ja: '君を幸せにしてあげるよ。',
+                        en: ['I\'ll', 'make', 'you', 'happy.'],
+                        exp: 'S(I\'ll) + V(make) + O(you) + C(happy) の第5文型(SVOC)です。'
+                    },
+                    {
+                        ja: 'トムは私に好きだと言った。',
+                        en: ['Tom', 'told', 'me', 'he', 'loved', 'me.'],
+                        exp: 'S(Tom) + V(told) + O1(me) + O2(that節: he loved me) の第4文型(SVOO)です。'
+                    },
+                    {
+                        ja: '私は中学校の運動会を楽しみました。',
+                        en: ['I', 'enjoyed', 'the', 'sports', 'day', 'in', 'junior', 'high', 'school.'],
+                        exp: 'S(I) + V(enjoyed) + O(the sports day) の第3文型(SVO)です。'
+                    },
+                    {
+                        ja: '楽しそうですね（あなたは幸せそうに見える）。',
+                        en: ['You', 'look', 'happy.'],
+                        exp: 'S(You) + V(look) + C(happy) の第2文型(SVC)です。「〜のように見える」を表します。'
+                    },
+                    {
+                        ja: '修学旅行は私に素晴らしい思い出をくれました。',
+                        en: ['Our', 'school', 'trip', 'gave', 'me', 'wonderful', 'memories.'],
+                        exp: 'S(Our school trip) + V(gave) + O1(me) + O2(wonderful memories) の第4文型(SVOO)です。'
+                    },
+                    {
+                        ja: '母はよく料理の仕方を教えてくれます。',
+                        en: ['My', 'mother', 'often', 'teaches', 'me', 'how', 'to', 'cook.'],
+                        exp: 'S(My mother) + V(teaches) + O1(me) + O2(how to cook) の第4文型(SVOO)構造です。'
+                    },
+                    {
+                        ja: 'そのアプリが英語学習に役立つと分かりました。',
+                        en: ['I', 'found', 'the', 'app', 'useful', 'for', 'English', 'learning.'],
+                        exp: 'S(I) + V(found) + O(the app) + C(useful) の第5文型(SVOC)です。「OがCだとわかる」を表します。'
+                    },
+                    {
+                        ja: '私たちは彼をジミーと呼ぶ。',
+                        en: ['We', 'call', 'him', 'Jimmy.'],
+                        exp: 'S(We) + V(call) + O(him) + C(Jimmy) の第5文型(SVOC)です。'
+                    },
+                    {
+                        ja: 'そのドアを開けたままにしておいてくれますか。',
+                        en: ['Can', 'you', 'keep', 'the', 'door', 'open?'],
+                        exp: 'keep + O(the door) + C(open) の第5文型(SVOC)を用いた疑問文です。'
+                    },
+                    {
+                        ja: 'あなたはどれくらいの頻度で外食しますか。',
+                        en: ['How', 'often', 'do', 'you', 'eat', 'out?'],
+                        exp: 'How often で始まる疑問文です。eat out は「外食する」という第1文型(SV)動詞句です。'
+                    },
+                    {
+                        ja: '母はオンラインショッピングのためにインターネットを使います。',
+                        en: ['My', 'mother', 'uses', 'the', 'internet', 'for', 'online', 'shopping.'],
+                        exp: 'S(My mother) + V(uses) + O(the internet) の第3文型(SVO)です。'
+                    }
+                ]
+            },
+            {
+                id: 'L4_L5_tenses',
+                title: 'Lesson 4-5: 時制 (Tenses)',
+                desc: '現在・過去・未来・進行形・予定表現',
+                icon: 'fa-clock',
+                color: 'from-blue-500 to-indigo-600',
+                questions: [
+                    {
+                        ja: 'そのとき，彼らはルーシーとおしゃべりしていました。',
+                        en: ['They', 'were', 'chatting', 'with', 'Lucy', 'at', 'that', 'time.'],
+                        exp: '過去進行形 (were + chatting) で当時の進行中動作を表します。'
+                    },
+                    {
+                        ja: '私はあなたの優しさを決して忘れないでしょう。',
+                        en: ['I', 'will', 'never', 'forget', 'your', 'kindness.'],
+                        exp: '意志を表す助動詞 will と否定語 never を組み合わせた表現です。'
+                    },
+                    {
+                        ja: '私の親友はネコを1匹，犬を2匹飼っています。',
+                        en: ['My', 'best', 'friend', 'has', 'a', 'cat', 'and', 'two', 'dogs.'],
+                        exp: '現在の状態を表す現在形 has（3人称単数）を使用します。'
+                    },
+                    {
+                        ja: '私たちは日曜日にそのワークショップを訪れる予定です。',
+                        en: ['We', 'are', 'visiting', 'the', 'workshop', 'on', 'Sunday.'],
+                        exp: '現在進行形 (are visiting) で確実な近い未来の予定を表します。'
+                    },
+                    {
+                        ja: '私は電話があった時，入浴していました。',
+                        en: ['I', 'was', 'taking', 'a', 'bath', 'when', 'I', 'got', 'the', 'call.'],
+                        exp: '過去のある時点で進行中だった動作を表す過去進行形 (was taking) です。'
+                    },
+                    {
+                        ja: 'ケンは来週祖父母を訪れる予定です。',
+                        en: ['Ken', 'is', 'visiting', 'his', 'grandparents', 'next', 'week.'],
+                        exp: '現在進行形 (is visiting) を用いて未来の決定した予定を示します。'
+                    },
+                    {
+                        ja: 'あの子どもは今，何をしているのですか。',
+                        en: ['What', 'is', 'that', 'child', 'doing', 'now?'],
+                        exp: '現在進行形の疑問文 (What + is + 主語 + doing ?) です。'
+                    },
+                    {
+                        ja: '大学では科学技術を勉強するつもりです。',
+                        en: ['I', 'am', 'going', 'to', 'study', 'science', 'and', 'technology', 'at', 'university.'],
+                        exp: 'あらかじめ意図している未来の計画を表す be going to + 動詞の原形 です。'
+                    },
+                    {
+                        ja: '私の父は毎日，始発電車に乗ります。',
+                        en: ['My', 'dad', 'takes', 'the', 'first', 'train', 'every', 'day.'],
+                        exp: '日々の習慣的動作を表すため現在形 takes（3単現）を使います。'
+                    },
+                    {
+                        ja: 'ジェーンは明日，そのパーティーに来るだろうか。',
+                        en: ['Will', 'Jane', 'come', 'to', 'the', 'party', 'tomorrow?'],
+                        exp: '未来の予測・意図を尋ねる Will + 主語 + 動詞の原形 の疑問文です。'
+                    },
+                    {
+                        ja: '私はロンドンへの旅行を計画しているところです。',
+                        en: ['I', 'am', 'planning', 'a', 'trip', 'to', 'London.'],
+                        exp: '「今〜している」という現在進行形 (am planning) です。'
+                    },
+                    {
+                        ja: '私たちは5年前この町に引っ越してきました。',
+                        en: ['We', 'moved', 'to', 'this', 'town', 'five', 'years', 'ago.'],
+                        exp: '明確な過去の時点 (five years ago) を示す過去形 moved です。'
+                    },
+                    {
+                        ja: '地球は太陽の周りを回っている。',
+                        en: ['The', 'earth', 'goes', 'around', 'the', 'sun.'],
+                        exp: '不変の真理・自然現象を表すため常に現在形 (goes) を使います。'
+                    },
+                    {
+                        ja: 'わかった。すぐに彼女に電話を入れるよ。',
+                        en: ['OK,', 'I', 'will', 'phone', 'her', 'right', 'away.'],
+                        exp: 'その場で決めた即座の意志を表す will + 動詞の原形 です。'
+                    },
+                    {
+                        ja: '昨日は父が車で駅まで送ってくれた。',
+                        en: ['My', 'father', 'drove', 'me', 'to', 'the', 'station', 'yesterday.'],
+                        exp: '過去の特定の出来事（yesterday）を表す過去形 drove を使います。'
+                    }
+                ]
+            },
+            {
+                id: 'L6_L7_perfect',
+                title: 'Lesson 6-7: 完了形 (Perfect Tenses)',
+                desc: '現在完了・過去完了・完了進行形',
+                icon: 'fa-hourglass-half',
+                color: 'from-amber-500 to-orange-600',
+                questions: [
+                    {
+                        ja: 'ケンとジェーンは10年間知り合いです。',
+                        en: ['Ken', 'and', 'Jane', 'have', 'known', 'each', 'other', 'for', '10', 'years.'],
+                        exp: '過去から現在まで状態が続いている【継続】の現在完了形 (have known) です。'
+                    },
+                    {
+                        ja: '私は今朝からずっと自分の部屋を掃除し続けているんです。',
+                        en: ['I', 'have', 'been', 'cleaning', 'my', 'room', 'since', 'this', 'morning.'],
+                        exp: '過去から現在まで動作が継続している【現在完了進行形】(have been cleaning) です。'
+                    },
+                    {
+                        ja: 'そのカフェは開店して以来ずっと人気があります。',
+                        en: ['The', 'cafe', 'has', 'been', 'popular', 'since', 'it', 'opened.'],
+                        exp: 'since + 過去の起点 を伴う現在完了形の継続表現 (has been) です。'
+                    },
+                    {
+                        ja: '私は本を読んでいたから，映画のエンディングを知っていました。',
+                        en: ['I', 'knew', 'the', 'ending', 'of', 'the', 'movie', 'because', 'I', 'had', 'read', 'the', 'book.'],
+                        exp: '過去の時点 (knew) よりも前に発生した完了・経験を表す【過去完了形】(had read) です。'
+                    },
+                    {
+                        ja: '私の叔父は先月からずっと入院しています。',
+                        en: ['My', 'uncle', 'has', 'been', 'in', 'the', 'hospital', 'since', 'last', 'month.'],
+                        exp: '「先月からずっと」状態が続いている現在完了形 (has been) です。'
+                    },
+                    {
+                        ja: '見て！ 雨がやんだわ。',
+                        en: ['Look!', 'It', 'has', 'stopped', 'raining.'],
+                        exp: '「雨がやんだ（結果、今降っていない）」という【完了・結果】を表す現在完了形です。'
+                    },
+                    {
+                        ja: '今までにカナダに行ったことはありますか。',
+                        en: ['Have', 'you', 'ever', 'been', 'to', 'Canada?'],
+                        exp: '「〜に行ったことがある」という経験を尋ねる Have you ever been to ~ ? です。'
+                    },
+                    {
+                        ja: '私はすでに昼食を食べ終えました。',
+                        en: ['I', 'have', 'already', 'finished', 'eating', 'lunch.'],
+                        exp: '動作の【完了】を表す have + already + 過去分詞 (finished) です。'
+                    },
+                    {
+                        ja: '私たちは長い間ここに住んでいます。',
+                        en: ['We', 'have', 'lived', 'here', 'for', 'a', 'long', 'time.'],
+                        exp: '期間 (for a long time) を伴う現在完了形【継続】の文法表現です。'
+                    },
+                    {
+                        ja: 'その試合は私がスタジアムに着いたときには，すでに始まっていました。',
+                        en: ['The', 'game', 'had', 'already', 'started', 'when', 'I', 'got', 'to', 'the', 'stadium.'],
+                        exp: '過去の基準点 (got) より前に完了していた動作を表す【過去完了形】(had already started) です。'
+                    },
+                    {
+                        ja: '私の弟は宿題を終えました。',
+                        en: ['My', 'brother', 'has', 'finished', 'his', 'homework.'],
+                        exp: '動作が完了した結果を表す現在完了形 (has finished) です。'
+                    },
+                    {
+                        ja: '私は7年間英語を勉強しています。',
+                        en: ['I', 'have', 'been', 'studying', 'English', 'for', 'seven', 'years.'],
+                        exp: '動作の継続を強調する現在完了進行形 (have been studying) です。'
+                    },
+                    {
+                        ja: '私は10時までには宿題を終わらせていますよ。',
+                        en: ['I', 'will', 'have', 'finished', 'my', 'homework', 'by', 'ten.'],
+                        exp: '未来のある時点での完了を表す【未来完了形】(will have finished) です。'
+                    },
+                    {
+                        ja: 'この神社は，1000年ここにあります。',
+                        en: ['This', 'shrine', 'has', 'been', 'here', 'for', 'a', 'thousand', 'years.'],
+                        exp: '1000年という長い期間の存在を表す現在完了形 (has been) です。'
+                    }
+                ]
+            },
+            {
+                id: 'L8_L10_auxiliary',
+                title: 'Lesson 8-10: 助動詞 (Auxiliary Verbs)',
+                desc: 'can / must / should / may / have to / had better などの意図・義務表現',
+                icon: 'fa-bolt',
+                color: 'from-emerald-500 to-teal-600',
+                questions: [
+                    {
+                        ja: 'あなたは今すぐ部屋を掃除しなければなりません。',
+                        en: ['You', 'must', 'clean', 'your', 'room', 'right', 'now.'],
+                        exp: 'must + 動詞の原形 で強い義務・命令「〜しなければならない」を表します。'
+                    },
+                    {
+                        ja: '私は英語をとても上手に話すことができます。',
+                        en: ['I', 'can', 'speak', 'English', 'very', 'well.'],
+                        exp: '能力・可能を表す助動詞 can + 動詞の原形 (speak) です。'
+                    },
+                    {
+                        ja: '私たちはもっと野菜を食べるべきです。',
+                        en: ['We', 'should', 'eat', 'more', 'vegetables.'],
+                        exp: 'should は「〜した方がよい / 〜すべきだ」というアドバイス・義務を表します。'
+                    },
+                    {
+                        ja: 'ここで写真を撮ってもいいですか？',
+                        en: ['May', 'I', 'take', 'a', 'photo', 'here?'],
+                        exp: 'May I ~ ? は丁寧な許可を求める表現「〜してもよろしいですか？」です。'
+                    },
+                    {
+                        ja: '図書館では静かにしなければなりません。',
+                        en: ['You', 'have', 'to', 'be', 'quiet', 'in', 'the', 'library.'],
+                        exp: 'have to + 動詞の原形 (be) で義務「〜しなければならない」を表します。'
+                    },
+                    {
+                        ja: '彼は今日ここに来ないかもしれない。',
+                        en: ['He', 'may', 'not', 'come', 'here', 'today.'],
+                        exp: 'may not は「〜でないかもしれない」という推測の否定を表します。'
+                    },
+                    {
+                        ja: '窓を開けていただけますか？',
+                        en: ['Could', 'you', 'open', 'the', 'window,', 'please?'],
+                        exp: 'Could you ~ ? は丁寧な依頼「〜していただけますか？」を表します。'
+                    },
+                    {
+                        ja: '温かい紅茶はいかがですか？',
+                        en: ['Would', 'you', 'like', 'a', 'cup', 'of', 'hot', 'tea?'],
+                        exp: 'Would you like ~ ? で丁寧に勧める表現「〜はいかがですか」になります。'
+                    },
+                    {
+                        ja: '遅れないように早く出発したほうがいいよ。',
+                        en: ['You', 'had', 'better', 'leave', 'early.'],
+                        exp: 'had better + 動詞の原形 で強いアドバイス「〜したほうがいい」を表します。'
+                    },
+                    {
+                        ja: '以前はこの近くに大きな公園がありました。',
+                        en: ['There', 'used', 'to', 'be', 'a', 'big', 'park', 'near', 'here.'],
+                        exp: 'used to + 動詞の原形 で「かつて〜があった（過去の状態・習慣）」を表します。'
+                    }
+                ]
+            },
+            {
+                id: 'L13_L15_infinitives',
+                title: 'Lesson 13-15: 不定詞 (Infinitives)',
+                desc: 'to+原形（名詞的・形容詞的・副詞的用法 / O to V 構文）',
+                icon: 'fa-link',
+                color: 'from-rose-500 to-red-600',
+                questions: [
+                    {
+                        ja: '私の夢は世界中を旅行することです。',
+                        en: ['My', 'dream', 'is', 'to', 'travel', 'around', 'the', 'world.'],
+                        exp: 'be動詞の補語として to + 動詞の原形 (to travel) を置く【名詞的用法】です。'
+                    },
+                    {
+                        ja: '彼女は新しい洋服を買うために買い物に行った。',
+                        en: ['She', 'went', 'shopping', 'to', 'buy', 'new', 'clothes.'],
+                        exp: '目的「〜するために」を表す不定詞の【副詞的用法】(to buy) です。'
+                    },
+                    {
+                        ja: '私はあなたに伝えるべき重要な知らせがあります。',
+                        en: ['I', 'have', 'important', 'news', 'to', 'tell', 'you.'],
+                        exp: '名詞 (news) を後ろから修飾する不定詞の【形容詞的用法】(to tell) です。'
+                    },
+                    {
+                        ja: '彼は医者になるために一生懸命勉強しています。',
+                        en: ['He', 'studies', 'hard', 'to', 'become', 'a', 'doctor.'],
+                        exp: '目的「〜になるために」を表す不定詞の副詞的用法 (to become) です。'
+                    },
+                    {
+                        ja: '鍵をかけるのを忘れないでね。',
+                        en: ['Remember', 'to', 'lock', 'the', 'door.'],
+                        exp: 'remember + to V で「（これから）〜することを覚えている／忘れない」です。'
+                    },
+                    {
+                        ja: 'その問題は自力で解くには難しすぎる。',
+                        en: ['The', 'problem', 'is', 'too', 'difficult', 'to', 'solve', 'alone.'],
+                        exp: 'too + 形容詞 + to V で「〜すぎてVできない」を表す構文です。'
+                    },
+                    {
+                        ja: '私は何か冷たい飲み物が欲しい。',
+                        en: ['I', 'want', 'something', 'cold', 'to', 'drink.'],
+                        exp: 'something + 形容詞 (cold) + to V (drink) の語順になります。'
+                    },
+                    {
+                        ja: '彼は親切にも私を手伝ってくれた。',
+                        en: ['He', 'was', 'kind', 'enough', 'to', 'help', 'me.'],
+                        exp: '形容詞 + enough to V で「Vするほど〜だ / 親切にもVしてくれた」の意味になります。'
+                    },
+                    {
+                        ja: 'どこへ行けばいいか教えてください。',
+                        en: ['Please', 'tell', 'me', 'where', 'to', 'go.'],
+                        exp: '疑問詞 + to V (where to go) で「どこへ行くべきか」という名詞節相当の役割をします。'
+                    },
+                    {
+                        ja: '母は私に部屋を掃除するように言った。',
+                        en: ['My', 'mother', 'told', 'me', 'to', 'clean', 'my', 'room.'],
+                        exp: 'tell + O + to V で「Oに〜するよう言う」という重要な第5文型目的語・不定詞構文です。'
+                    }
+                ]
+            }
+        ];
+
+        /* ----------------------------------------------------
+         * STATE MANAGEMENT
+         * ---------------------------------------------------- */
+        let state = {
+            currentUnit: null,
+            questions: [],
+            currentIndex: 0,
+            score: 0,
+            selectedWords: [],
+            availableWords: [],
+            userAnswersLog: [],
+            soundEnabled: true,
+            clearedUnitsCount: 0
+        };
+
+        /* ----------------------------------------------------
+         * AUDIO / TTS SYNTHESIS
+         * ---------------------------------------------------- */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!state.soundEnabled) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'correct') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now); // A3
+                    osc.frequency.setValueAtTime(180, now + 0.12);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                }
+            } catch (e) {
+                console.log('Audio error:', e);
+            }
+        }
+
+        function speakModelAnswer() {
+            const q = state.questions[state.currentIndex];
+            if (!q) return;
+            const text = q.en.join(' ');
+            
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function toggleSound() {
+            state.soundEnabled = !state.soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (state.soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-lg';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-lg text-slate-400';
+            }
+        }
+
+        /* ----------------------------------------------------
+         * APP FLOW & SCREEN NAVIGATION
+         * ---------------------------------------------------- */
+        window.addEventListener('DOMContentLoaded', () => {
+            renderUnitList();
+            loadStats();
+        });
+
+        function showUnitSelection() {
+            document.getElementById('unit-select-screen').classList.remove('hidden');
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('flex');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('feedback-modal').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderUnitList() {
+            const grid = document.getElementById('unit-grid');
+            grid.innerHTML = '';
+
+            GRAMMAR_UNITS.forEach((unit) => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between group';
+                card.onclick = () => startQuiz(unit.id);
+
+                card.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${unit.color} text-white flex items-center justify-center text-xl shadow-md group-hover:scale-105 transition transform">
+                                <i class="fa-solid ${unit.icon}"></i>
+                            </div>
+                            <span class="text-xs font-bold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">10 問</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-800 group-hover:text-indigo-600 transition">${unit.title}</h3>
+                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">${unit.desc}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-indigo-600">
+                        <span>スタート</span>
+                        <i class="fa-solid fa-chevron-right group-hover:translate-x-1 transition"></i>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        /* ----------------------------------------------------
+         * QUIZ LOGIC
+         * ---------------------------------------------------- */
+        function startQuiz(unitId) {
+            const unit = GRAMMAR_UNITS.find(u => u.id === unitId);
+            if (!unit) return;
+
+            state.currentUnit = unit;
+            // Randomize and take 10 questions
+            const shuffled = [...unit.questions].sort(() => Math.random() - 0.5);
+            state.questions = shuffled.slice(0, 10);
+            
+            state.currentIndex = 0;
+            state.score = 0;
+            state.userAnswersLog = [];
+
+            document.getElementById('unit-select-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            document.getElementById('quiz-screen').classList.add('flex');
+            
+            document.getElementById('quiz-unit-title').innerText = unit.title;
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = state.questions[state.currentIndex];
+            state.selectedWords = [];
+
+            // Wrap each word token in a unique ID object
+            const wordsWithIds = q.en.map((word, idx) => ({ id: `${idx}-${word}`, text: word }));
+            state.availableWords = [...wordsWithIds].sort(() => Math.random() - 0.5);
+
+            document.getElementById('current-q-num').innerText = state.currentIndex + 1;
+            document.getElementById('japanese-text').innerText = q.ja;
+            
+            const progress = ((state.currentIndex + 1) / 10) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+
+            renderWords();
+        }
+
+        function renderWords() {
+            const answerZone = document.getElementById('answer-zone');
+            const wordPool = document.getElementById('word-pool');
+            const checkBtn = document.getElementById('check-btn');
+
+            answerZone.innerHTML = '';
+
+            if (state.selectedWords.length === 0) {
+                const placeholder = document.createElement('span');
+                placeholder.id = 'placeholder-text';
+                placeholder.className = 'text-slate-400 text-sm w-full text-center py-4 pointer-events-none';
+                placeholder.innerText = '下の単語をタップして文章を完成させてね';
+                answerZone.appendChild(placeholder);
+                checkBtn.disabled = true;
+            } else {
+                checkBtn.disabled = false;
+
+                state.selectedWords.forEach((item, index) => {
+                    const chip = createWordChip(item, () => deselectWord(index), 'bg-indigo-600 text-white shadow-md border-indigo-700');
+                    answerZone.appendChild(chip);
+                });
+            }
+
+            wordPool.innerHTML = '';
+            state.availableWords.forEach((item) => {
+                const chip = createWordChip(item, () => selectWord(item), 'bg-slate-100 hover:bg-indigo-50 text-slate-800 border-slate-200 hover:border-indigo-300');
+                wordPool.appendChild(chip);
+            });
+        }
+
+        function createWordChip(item, onClickHandler, extraClasses) {
+            const chip = document.createElement('button');
+            chip.className = `word-chip font-medium text-sm sm:text-base px-3.5 py-2 rounded-xl border transition flex items-center justify-center pop-in ${extraClasses}`;
+            chip.innerText = item.text;
+            chip.onclick = () => {
+                playSound('click');
+                onClickHandler();
+            };
+            return chip;
+        }
+
+        function selectWord(item) {
+            state.availableWords = state.availableWords.filter(w => w.id !== item.id);
+            state.selectedWords.push(item);
+            renderWords();
+        }
+
+        function deselectWord(index) {
+            const removed = state.selectedWords.splice(index, 1)[0];
+            state.availableWords.push(removed);
+            renderWords();
+        }
+
+        function clearAnswer() {
+            if (state.selectedWords.length === 0) return;
+            playSound('click');
+            state.availableWords = [...state.availableWords, ...state.selectedWords];
+            state.selectedWords = [];
+            renderWords();
+        }
+
+        /* ----------------------------------------------------
+         * ANSWER VERIFICATION
+         * ---------------------------------------------------- */
+        function checkAnswer() {
+            const q = state.questions[state.currentIndex];
+            const userWords = state.selectedWords.map(w => w.text);
+            const userSentence = userWords.join(' ');
+            const modelSentence = q.en.join(' ');
+
+            const isCorrect = userSentence === modelSentence;
+
+            if (isCorrect) {
+                state.score++;
+                playSound('correct');
+            } else {
+                playSound('wrong');
+            }
+
+            state.userAnswersLog.push({
+                question: q,
+                userSentence: userSentence,
+                isCorrect: isCorrect
+            });
+
+            showFeedbackModal(isCorrect, userSentence, modelSentence, q.exp);
+        }
+
+        function showFeedbackModal(isCorrect, userSentence, modelSentence, explanation) {
+            const modal = document.getElementById('feedback-modal');
+            const iconBox = document.getElementById('modal-icon');
+            const title = document.getElementById('modal-title');
+            const subtitle = document.getElementById('modal-subtitle');
+            const userAnsBox = document.getElementById('user-ans-box');
+            const modalUserAns = document.getElementById('modal-user-ans');
+            const modalModelAns = document.getElementById('modal-model-ans');
+            const modalExp = document.getElementById('modal-explanation');
+
+            if (isCorrect) {
+                iconBox.className = 'w-12 h-12 rounded-2xl flex items-center justify-center text-white text-2xl font-bold bg-emerald-500 shadow-emerald-200';
+                iconBox.innerHTML = '<i class="fa-solid fa-check"></i>';
+                title.innerText = '正解です！ 🎉';
+                title.className = 'text-2xl font-black text-emerald-600';
+                subtitle.innerText = 'パーフェクト！この調子で進みましょう。';
+                userAnsBox.classList.add('hidden');
+            } else {
+                iconBox.className = 'w-12 h-12 rounded-2xl flex items-center justify-center text-white text-2xl font-bold bg-rose-500 shadow-rose-200';
+                iconBox.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                title.innerText = 'おしい！ ざんねん…';
+                title.className = 'text-2xl font-black text-rose-600';
+                subtitle.innerText = '模範解答を確認して文法チェックをしよう。';
+                
+                modalUserAns.innerText = userSentence;
+                userAnsBox.classList.remove('hidden');
+            }
+
+            modalModelAns.innerText = modelSentence;
+            modalExp.innerText = explanation;
+
+            modal.classList.remove('hidden');
+
+            if (isCorrect) {
+                setTimeout(speakModelAnswer, 300);
+            }
+        }
+
+        function nextQuestion() {
+            document.getElementById('feedback-modal').classList.add('hidden');
+            state.currentIndex++;
+
+            if (state.currentIndex >= state.questions.length) {
+                finishQuiz();
+            } else {
+                loadQuestion();
+            }
+        }
+
+        /* ----------------------------------------------------
+         * RESULTS & REVIEW SCREEN
+         * ---------------------------------------------------- */
+        function finishQuiz() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('flex');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            document.getElementById('result-unit-title').innerText = state.currentUnit.title;
+            document.getElementById('final-score').innerText = state.score;
+
+            const starContainer = document.getElementById('star-rating');
+            starContainer.innerHTML = '';
+            let starsCount = 1;
+            if (state.score >= 9) starsCount = 3;
+            else if (state.score >= 6) starsCount = 2;
+
+            for (let i = 0; i < 3; i++) {
+                const star = document.createElement('i');
+                if (i < starsCount) {
+                    star.className = 'fa-solid fa-star text-amber-400';
+                } else {
+                    star.className = 'fa-regular fa-star text-slate-300';
+                }
+                starContainer.appendChild(star);
+            }
+
+            state.clearedUnitsCount++;
+            localStorage.setItem('gm_cleared_count', state.clearedUnitsCount);
+            updateStatsUI();
+
+            renderReviewList();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderReviewList() {
+            const list = document.getElementById('review-list');
+            list.innerHTML = '';
+
+            state.userAnswersLog.forEach((log, i) => {
+                const item = document.createElement('div');
+                item.className = `p-4 rounded-2xl border text-sm space-y-2 ${log.isCorrect ? 'bg-emerald-50/50 border-emerald-200' : 'bg-rose-50/50 border-rose-200'}`;
+
+                item.innerHTML = `
+                    <div class="flex items-center justify-between font-bold">
+                        <span class="text-slate-500">Q${i + 1}. ${log.question.ja}</span>
+                        <span class="${log.isCorrect ? 'text-emerald-600' : 'text-rose-600'} text-xs px-2.5 py-1 rounded-full bg-white border">
+                            ${log.isCorrect ? '<i class="fa-solid fa-check mr-1"></i>正解' : '<i class="fa-solid fa-xmark mr-1"></i>不正解'}
+                        </span>
+                    </div>
+                    ${!log.isCorrect ? `<div class="text-xs text-rose-600"><span class="font-bold">あなたの解答:</span> ${log.userSentence}</div>` : ''}
+                    <div class="text-slate-800 font-bold"><span class="text-xs font-semibold text-slate-400 block">正解英文:</span>${log.question.en.join(' ')}</div>
+                    <p class="text-xs text-slate-600 bg-white/80 p-2.5 rounded-xl border border-slate-100 mt-1">${log.question.exp}</p>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function retryCurrentUnit() {
+            if (state.currentUnit) {
+                startQuiz(state.currentUnit.id);
+            }
+        }
+
+        function loadStats() {
+            const saved = localStorage.getItem('gm_cleared_count');
+            if (saved) {
+                state.clearedUnitsCount = parseInt(saved, 10);
+            }
+            updateStatsUI();
+        }
+
+        function updateStatsUI() {
+            document.getElementById('total-cleared').innerText = state.clearedUnitsCount;
+        }
+    </script>
+</body>
+</html>

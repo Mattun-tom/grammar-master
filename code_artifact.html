@@ -72,7 +72,7 @@
             <div class="text-center space-y-2">
                 <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Lessons</span>
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800">学習する単元を選んでね</h2>
-                <p class="text-slate-500 text-sm">好きな単元を選んで1セット10問の並べ替えに挑戦しよう！</p>
+                <p class="text-slate-500 text-sm">プリントの問題からランダムに10問が出題されるよ！</p>
             </div>
 
             <!-- Unit List Grid -->
@@ -165,7 +165,7 @@
                 <!-- Actions -->
                 <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
                     <button onclick="retryCurrentUnit()" class="py-3 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-rotate-right"></i> もう一度挑戦する
+                        <i class="fa-solid fa-rotate-right"></i> もう一度挑戦する（別問題）
                     </button>
                     <button onclick="showUnitSelection()" class="py-3 px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition flex items-center justify-center gap-2">
                         <i class="fa-solid fa-list"></i> 単元一覧に戻る
@@ -246,13 +246,107 @@
 
     <script>
         /* ----------------------------------------------------
-         * GRAMMAR QUESTION DATA STORE (Mapped from Text Data)
+         * GRAMMAR QUESTION DATA STORE (Mapped from Print Materials)
          * ---------------------------------------------------- */
         const GRAMMAR_UNITS = [
             {
-                id: 'L1_L3_patterns',
-                title: 'Lesson 1-3: 文型・基本構造',
-                desc: 'SV/SVC/SVO/SVOO/SVOCの基本文型と否定文・疑問文',
+                id: 'L1_verbs_questions',
+                title: 'Lesson 1: 動詞／否定文・疑問文',
+                desc: 'be動詞・一般動詞・疑問詞(How/What/Where/When)を用いた基本構文',
+                icon: 'fa-comments',
+                color: 'from-blue-500 to-cyan-600',
+                questions: [
+                    {
+                        ja: 'あなたはどれくらいの頻度で外食しますか。',
+                        en: ['How', 'often', 'do', 'you', 'eat', 'out?'],
+                        exp: '頻度を尋ねる疑問詞「How often」に続く一般動詞の疑問文（do + S + V）です。'
+                    },
+                    {
+                        ja: '私たちの担任は優しいです。',
+                        en: ['Our', 'homeroom', 'teacher', 'is', 'kind.'],
+                        exp: '主語「Our homeroom teacher」に応じた be動詞 is を使用したSVC文型です。'
+                    },
+                    {
+                        ja: 'あなたはどの学校行事が好きですか。',
+                        en: ['Which', 'school', 'event', 'do', 'you', 'like?'],
+                        exp: '選択を求める疑問詞「Which + 名詞」の疑問文です。'
+                    },
+                    {
+                        ja: '彼は幸せではない。',
+                        en: ['He', 'isn\'t', 'happy.'],
+                        exp: 'be動詞の否定文（is + not / isn\'t）の基本構造です。'
+                    },
+                    {
+                        ja: '私達にはどれくらいの（量の）宿題がありますか。',
+                        en: ['How', 'much', 'homework', 'do', 'we', 'have?'],
+                        exp: '数えられない名詞（homework）の量を尋ねる「How much + 不可算名詞」の疑問文です。'
+                    },
+                    {
+                        ja: '母はオンラインショッピングのためにインターネットを使います。',
+                        en: ['My', 'mother', 'uses', 'the', 'internet', 'for', 'online', 'shopping.'],
+                        exp: '三人称単数現在の主語（My mother）に合わせて動詞に s（uses）をつけます。'
+                    },
+                    {
+                        ja: '昨日の夜、あなたは何をしましたか。',
+                        en: ['What', 'did', 'you', 'do', 'last', 'night?'],
+                        exp: '過去の動作を尋ねる「What + did + S + 動詞の原形 ?」の疑問文です。'
+                    },
+                    {
+                        ja: '私は犬が好きです。',
+                        en: ['I', 'like', 'dogs.'],
+                        exp: '一般的に「犬」全般を表す場合は複数形の dogs を用います。'
+                    },
+                    {
+                        ja: 'ケンはどのような種類の料理を食べましたか。',
+                        en: ['What', 'kind', 'of', 'dishes', 'did', 'Ken', 'eat?'],
+                        exp: '「What kind of + 複数名詞」で「どのような種類の〜」を表す過去形の疑問文です。'
+                    },
+                    {
+                        ja: 'あなたはどこに住んでいますか。',
+                        en: ['Where', 'do', 'you', 'live?'],
+                        exp: '場所を尋ねる疑問詞 Where を用いた一般動詞の疑問文です。'
+                    },
+                    {
+                        ja: '明日の試験について緊張しています。',
+                        en: ['I\'m', 'nervous', 'about', 'the', 'exam', 'tomorrow.'],
+                        exp: '「be nervous about ~」で「〜について神経質になっている・緊張している」を表します。'
+                    },
+                    {
+                        ja: 'あなたはいつ宿題をしますか。',
+                        en: ['When', 'do', 'you', 'do', 'your', 'homework?'],
+                        exp: '時を尋ねる When に続く「do your homework（宿題をする）」の疑問文です。'
+                    },
+                    {
+                        ja: '今晩何か予定ある？',
+                        en: ['Do', 'you', 'have', 'any', 'plans', 'this', 'evening?'],
+                        exp: '疑問文における「いくつかの〜」は any を使用します（any plans）。'
+                    },
+                    {
+                        ja: '私はその部活のメンバーではありません。',
+                        en: ['I\'m', 'not', 'a', 'member', 'of', 'the', 'club.'],
+                        exp: '「Aのメンバー」は「a member of A」で表現します。'
+                    },
+                    {
+                        ja: 'あなたはいくつの言語を話せますか。',
+                        en: ['How', 'many', 'languages', 'can', 'you', 'speak?'],
+                        exp: '数えられる名詞の数を尋ねる「How many + 可算名詞の複数形」の構文です。'
+                    },
+                    {
+                        ja: '私はオンラインゲームをしません。',
+                        en: ['I', 'don\'t', 'play', 'online', 'games.'],
+                        exp: '一般動詞の現在否定文（don\'t + 動詞の原形）です。'
+                    },
+                    {
+                        ja: 'あなたはどうやって学校に来ますか。',
+                        en: ['How', 'do', 'you', 'come', 'to', 'school?'],
+                        exp: '手段や交通方法を尋ねる疑問詞 How を用いた疑問文です。'
+                    }
+                ]
+            },
+            {
+                id: 'L2_L3_patterns',
+                title: 'Lesson 2-3: 基本文型 (第1〜第5文型)',
+                desc: 'SV / SVC / SVO / SVOO / SVOC の5つの基本文型と接続詞',
                 icon: 'fa-diagram-project',
                 color: 'from-violet-500 to-purple-600',
                 questions: [
@@ -289,17 +383,12 @@
                     {
                         ja: 'トムは私に好きだと言った。',
                         en: ['Tom', 'told', 'me', 'he', 'loved', 'me.'],
-                        exp: 'S(Tom) + V(told) + O1(me) + O2(that節: he loved me) の第4文型(SVOO)です。'
+                        exp: 'S(Tom) + V(told) + O1(me) + O2(he loved me) の第4文型(SVOO)です。'
                     },
                     {
                         ja: '私は中学校の運動会を楽しみました。',
                         en: ['I', 'enjoyed', 'the', 'sports', 'day', 'in', 'junior', 'high', 'school.'],
                         exp: 'S(I) + V(enjoyed) + O(the sports day) の第3文型(SVO)です。'
-                    },
-                    {
-                        ja: '楽しそうですね（あなたは幸せそうに見える）。',
-                        en: ['You', 'look', 'happy.'],
-                        exp: 'S(You) + V(look) + C(happy) の第2文型(SVC)です。「〜のように見える」を表します。'
                     },
                     {
                         ja: '修学旅行は私に素晴らしい思い出をくれました。',
@@ -327,23 +416,33 @@
                         exp: 'keep + O(the door) + C(open) の第5文型(SVOC)を用いた疑問文です。'
                     },
                     {
-                        ja: 'あなたはどれくらいの頻度で外食しますか。',
-                        en: ['How', 'often', 'do', 'you', 'eat', 'out?'],
-                        exp: 'How often で始まる疑問文です。eat out は「外食する」という第1文型(SV)動詞句です。'
+                        ja: '私のクラスメートたちにクッキーを作りました。',
+                        en: ['I', 'made', 'my', 'classmates', 'some', 'cookies.'],
+                        exp: 'S(I) + V(made) + O1(my classmates) + O2(some cookies) の第4文型(SVOO)です。'
                     },
                     {
-                        ja: '母はオンラインショッピングのためにインターネットを使います。',
-                        en: ['My', 'mother', 'uses', 'the', 'internet', 'for', 'online', 'shopping.'],
-                        exp: 'S(My mother) + V(uses) + O(the internet) の第3文型(SVO)です。'
+                        ja: '両親は私にすてきなセーターを買ってくれた。',
+                        en: ['My', 'parents', 'bought', 'me', 'a', 'nice', 'sweater.'],
+                        exp: 'buy + O1(人) + O2(物) で「人に物を買い与える」という第4文型です。'
+                    },
+                    {
+                        ja: '友達は私の苗字にちなんで，私のことをタカと呼びます。',
+                        en: ['My', 'friends', 'call', 'me', 'Taka', 'after', 'my', 'family', 'name.'],
+                        exp: '「call O C after ~」で「〜にちなんでOをCと呼ぶ」という意味になります。'
+                    },
+                    {
+                        ja: 'この教室には30人の生徒がいます。',
+                        en: ['There', 'are', 'thirty', 'students', 'in', 'this', 'classroom.'],
+                        exp: '「There are + 複数名詞 + 場所」で「〜に…がいる・ある」を表す第1文型(SV)構文です。'
                     }
                 ]
             },
             {
                 id: 'L4_L5_tenses',
                 title: 'Lesson 4-5: 時制 (Tenses)',
-                desc: '現在・過去・未来・進行形・予定表現',
+                desc: '現在・過去・未来・進行形・予定・意図表現',
                 icon: 'fa-clock',
-                color: 'from-blue-500 to-indigo-600',
+                color: 'from-emerald-500 to-teal-600',
                 questions: [
                     {
                         ja: 'そのとき，彼らはルーシーとおしゃべりしていました。',
@@ -419,13 +518,18 @@
                         ja: '昨日は父が車で駅まで送ってくれた。',
                         en: ['My', 'father', 'drove', 'me', 'to', 'the', 'station', 'yesterday.'],
                         exp: '過去の特定の出来事（yesterday）を表す過去形 drove を使います。'
+                    },
+                    {
+                        ja: '自動運転車はこの町の空気をよりきれいにするでしょう。',
+                        en: ['Self-driving', 'cars', 'will', 'make', 'this', 'city\'s', 'air', 'cleaner.'],
+                        exp: '未来の予測・判断を表す will + 動詞の原形 (make) です。'
                     }
                 ]
             },
             {
                 id: 'L6_L7_perfect',
                 title: 'Lesson 6-7: 完了形 (Perfect Tenses)',
-                desc: '現在完了・過去完了・完了進行形',
+                desc: '現在完了・過去完了・未来完了（継続・経験・完了・結果）',
                 icon: 'fa-hourglass-half',
                 color: 'from-amber-500 to-orange-600',
                 questions: [
@@ -436,7 +540,7 @@
                     },
                     {
                         ja: '私は今朝からずっと自分の部屋を掃除し続けているんです。',
-                        en: ['I', 'have', 'been', 'cleaning', 'my', 'room', 'since', 'this', 'morning.'],
+                        en: ['I\'ve', 'been', 'cleaning', 'my', 'room', 'since', 'this', 'morning.'],
                         exp: '過去から現在まで動作が継続している【現在完了進行形】(have been cleaning) です。'
                     },
                     {
@@ -498,15 +602,20 @@
                         ja: 'この神社は，1000年ここにあります。',
                         en: ['This', 'shrine', 'has', 'been', 'here', 'for', 'a', 'thousand', 'years.'],
                         exp: '1000年という長い期間の存在を表す現在完了形 (has been) です。'
+                    },
+                    {
+                        ja: '弟なら近くのレストランに行ったよ（行ってしまっていません）。',
+                        en: ['My', 'brother', 'has', 'gone', 'to', 'the', 'nearby', 'restaurant.'],
+                        exp: '「have gone to ~」で「〜に行ってしまっていまここにはいない（結果）」を表します。'
                     }
                 ]
             },
             {
                 id: 'L8_L10_auxiliary',
                 title: 'Lesson 8-10: 助動詞 (Auxiliary Verbs)',
-                desc: 'can / must / should / may / have to / had better などの意図・義務表現',
+                desc: 'can / must / should / may / have to / had better などの意図・義務・提案表現',
                 icon: 'fa-bolt',
-                color: 'from-emerald-500 to-teal-600',
+                color: 'from-rose-500 to-pink-600',
                 questions: [
                     {
                         ja: 'あなたは今すぐ部屋を掃除しなければなりません。',
@@ -563,9 +672,9 @@
             {
                 id: 'L13_L15_infinitives',
                 title: 'Lesson 13-15: 不定詞 (Infinitives)',
-                desc: 'to+原形（名詞的・形容詞的・副詞的用法 / O to V 構文）',
+                desc: 'to+原形（名詞的・形容詞的・副詞的用法 / tell O to V 構文）',
                 icon: 'fa-link',
-                color: 'from-rose-500 to-red-600',
+                color: 'from-sky-500 to-indigo-600',
                 questions: [
                     {
                         ja: '私の夢は世界中を旅行することです。',
@@ -738,7 +847,7 @@
                             <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${unit.color} text-white flex items-center justify-center text-xl shadow-md group-hover:scale-105 transition transform">
                                 <i class="fa-solid ${unit.icon}"></i>
                             </div>
-                            <span class="text-xs font-bold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">10 問</span>
+                            <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">${unit.questions.length}問 収録</span>
                         </div>
                         <div>
                             <h3 class="font-bold text-lg text-slate-800 group-hover:text-indigo-600 transition">${unit.title}</h3>
@@ -746,7 +855,7 @@
                         </div>
                     </div>
                     <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-indigo-600">
-                        <span>スタート</span>
+                        <span>10問に挑戦する</span>
                         <i class="fa-solid fa-chevron-right group-hover:translate-x-1 transition"></i>
                     </div>
                 `;
@@ -762,7 +871,7 @@
             if (!unit) return;
 
             state.currentUnit = unit;
-            // Randomize and take 10 questions
+            // Randomize and take up to 10 questions
             const shuffled = [...unit.questions].sort(() => Math.random() - 0.5);
             state.questions = shuffled.slice(0, 10);
             

@@ -243,13 +243,35 @@
     <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400">
         <p>&copy; GrammarMaster - 教科書準拠 英文法学習アプリ</p>
         
-        <!-- Visitor Counter (Method 1: SVG Badge - Updated for mattun-tom/grammar-master) -->
+        <!-- Visitor Counter (Method 2: Text Counter) -->
         <div class="mt-2.5 flex justify-center items-center">
-            <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fmattun-tom.github.io%2Fgrammar-master&count_bg=%234F46E5&title_bg=%23334155&icon=&icon_color=%23E7E7E7&title=Visitors&edge_flat=false" alt="訪問者数カウンター">
+            <div class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-full border border-indigo-200 text-xs font-bold shadow-sm">
+                <i class="fa-solid fa-users text-indigo-500"></i>
+                <span>累計訪問者数: <span id="visitor-count">---</span> 人</span>
+            </div>
         </div>
     </footer>
 
     <script>
+        // 訪問者数をカウント＆取得する関数 (方法2: CounterAPI)
+        async function updateVisitorCount() {
+            // カウントを識別する一意のキー（他の人と重複しない任意の英数字）
+            const namespace = "mattun-tom-grammar-master"; 
+            const key = "visits";
+
+            try {
+                const response = await fetch(`https://api.counterapi.dev/v1/${namespace}/${key}/up`);
+                const data = await response.json();
+                
+                if (data && data.count !== undefined) {
+                    document.getElementById('visitor-count').innerText = data.count.toLocaleString();
+                }
+            } catch (error) {
+                console.error('アクセスカウンターの読み込みに失敗しました:', error);
+                document.getElementById('visitor-count').innerText = '---';
+            }
+        }
+
         /* ----------------------------------------------------
          * GRAMMAR QUESTION DATA STORE (Mapped from Print Materials)
          * ---------------------------------------------------- */
@@ -826,6 +848,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             renderUnitList();
             loadStats();
+            updateVisitorCount();
         });
 
         function showUnitSelection() {

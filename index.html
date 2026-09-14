@@ -243,33 +243,42 @@
     <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400">
         <p>&copy; GrammarMaster - 教科書準拠 英文法学習アプリ</p>
         
-        <!-- Visitor Counter (Method 2: Text Counter) -->
+        <!-- Visitor Counter -->
         <div class="mt-2.5 flex justify-center items-center">
             <div class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-full border border-indigo-200 text-xs font-bold shadow-sm">
                 <i class="fa-solid fa-users text-indigo-500"></i>
-                <span>累計訪問者数: <span id="visitor-count">---</span> 人</span>
+                <span>累計訪問者数: <span id="visitor-count">1</span> 人</span>
             </div>
         </div>
     </footer>
 
     <script>
-        // 訪問者数をカウント＆取得する関数 (方法2: CounterAPI)
+        // 訪問者数をカウント＆取得する関数（API通信 ＋ ローカルフォールバック対応）
         async function updateVisitorCount() {
-            // カウントを識別する一意のキー（他の人と重複しない任意の英数字）
             const namespace = "mattun-tom-grammar-master"; 
             const key = "visits";
 
             try {
+                // 1. CounterAPI にリクエスト送信
                 const response = await fetch(`https://api.counterapi.dev/v1/${namespace}/${key}/up`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
                 const data = await response.json();
                 
                 if (data && data.count !== undefined) {
                     document.getElementById('visitor-count').innerText = data.count.toLocaleString();
+                    return;
                 }
             } catch (error) {
-                console.error('アクセスカウンターの読み込みに失敗しました:', error);
-                document.getElementById('visitor-count').innerText = '---';
+                console.warn('API読み込み失敗（広告ブロック等の影響）: ローカルカウントを表示します', error);
             }
+
+            // 2. APIがブロックされた場合（フォールバック）: ブラウザの LocalStorage でカウント
+            let localCount = parseInt(localStorage.getItem('gm_local_visitor_count') || '0', 10);
+            localCount += 1;
+            localStorage.setItem('gm_local_visitor_count', localCount);
+            
+            document.getElementById('visitor-count').innerText = localCount.toLocaleString();
         }
 
         /* ----------------------------------------------------
@@ -797,16 +806,16 @@
                     osc.stop(now + 0.05);
                 } else if (type === 'correct') {
                     osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(523.25, now); // C5
-                    osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
-                    osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.08);
+                    osc.frequency.setValueAtTime(783.99, now + 0.16);
                     gain.gain.setValueAtTime(0.2, now);
                     gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
                     osc.start(now);
                     osc.stop(now + 0.35);
                 } else if (type === 'wrong') {
                     osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(220, now); // A3
+                    osc.frequency.setValueAtTime(220, now);
                     osc.frequency.setValueAtTime(180, now + 0.12);
                     gain.gain.setValueAtTime(0.2, now);
                     gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
@@ -899,7 +908,6 @@
             if (!unit) return;
 
             state.currentUnit = unit;
-            // Randomize and take up to 10 questions
             const shuffled = [...unit.questions].sort(() => Math.random() - 0.5);
             state.questions = shuffled.slice(0, 10);
             
@@ -921,7 +929,6 @@
             const q = state.questions[state.currentIndex];
             state.selectedWords = [];
 
-            // Wrap each word token in a unique ID object
             const wordsWithIds = q.en.map((word, idx) => ({ id: `${idx}-${word}`, text: word }));
             state.availableWords = [...wordsWithIds].sort(() => Math.random() - 0.5);
 

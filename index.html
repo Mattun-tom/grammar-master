@@ -253,13 +253,11 @@
     </footer>
 
     <script>
-        // 訪問者数をカウント＆取得する関数（API通信 ＋ ローカルフォールバック対応）
         async function updateVisitorCount() {
             const namespace = "mattun-tom-grammar-master"; 
             const key = "visits";
 
             try {
-                // 1. CounterAPI にリクエスト送信
                 const response = await fetch(`https://api.counterapi.dev/v1/${namespace}/${key}/up`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 
@@ -270,10 +268,9 @@
                     return;
                 }
             } catch (error) {
-                console.warn('API読み込み失敗（広告ブロック等の影響）: ローカルカウントを表示します', error);
+                console.warn('API読み込み失敗: ローカルカウントを表示します', error);
             }
 
-            // 2. APIがブロックされた場合（フォールバック）: ブラウザの LocalStorage でカウント
             let localCount = parseInt(localStorage.getItem('gm_local_visitor_count') || '0', 10);
             localCount += 1;
             localStorage.setItem('gm_local_visitor_count', localCount);
@@ -281,428 +278,280 @@
             document.getElementById('visitor-count').innerText = localCount.toLocaleString();
         }
 
-        /* ----------------------------------------------------
-         * GRAMMAR QUESTION DATA STORE (Mapped from Print Materials)
-         * ---------------------------------------------------- */
         const GRAMMAR_UNITS = [
             {
                 id: 'L1_verbs_questions',
                 title: 'Lesson 1: 動詞／否定文・疑問文',
-                desc: 'be動詞・一般動詞・疑問詞(How/What/Where/When)を用いた基本構文',
+                desc: 'be動詞・一般動詞・疑問詞(How/What/Where/When/Which)を用いた基本構文',
                 icon: 'fa-comments',
                 color: 'from-blue-500 to-cyan-600',
                 questions: [
-                    {
-                        ja: 'あなたはどれくらいの頻度で外食しますか。',
-                        en: ['How', 'often', 'do', 'you', 'eat', 'out?'],
-                        exp: '頻度を尋ねる疑問詞「How often」に続く一般動詞の疑問文（do + S + V）です。'
-                    },
-                    {
-                        ja: '私たちの担任は優しいです。',
-                        en: ['Our', 'homeroom', 'teacher', 'is', 'kind.'],
-                        exp: '主語「Our homeroom teacher」に応じた be動詞 is を使用したSVC文型です。'
-                    },
-                    {
-                        ja: 'あなたはどの学校行事が好きですか。',
-                        en: ['Which', 'school', 'event', 'do', 'you', 'like?'],
-                        exp: '選択を求める疑問詞「Which + 名詞」の疑問文です。'
-                    },
-                    {
-                        ja: '彼は幸せではない。',
-                        en: ['He', 'isn\'t', 'happy.'],
-                        exp: 'be動詞の否定文（is + not / isn\'t）の基本構造です。'
-                    },
-                    {
-                        ja: '私達にはどれくらいの（量の）宿題がありますか。',
-                        en: ['How', 'much', 'homework', 'do', 'we', 'have?'],
-                        exp: '数えられない名詞（homework）の量を尋ねる「How much + 不可算名詞」の疑問文です。'
-                    },
-                    {
-                        ja: '母はオンラインショッピングのためにインターネットを使います。',
-                        en: ['My', 'mother', 'uses', 'the', 'internet', 'for', 'online', 'shopping.'],
-                        exp: '三人称単数現在の主語（My mother）に合わせて動詞に s（uses）をつけます。'
-                    },
-                    {
-                        ja: '昨日の夜、あなたは何をしましたか。',
-                        en: ['What', 'did', 'you', 'do', 'last', 'night?'],
-                        exp: '過去の動作を尋ねる「What + did + S + 動詞の原形 ?」の疑問文です。'
-                    },
-                    {
-                        ja: '私は犬が好きです。',
-                        en: ['I', 'like', 'dogs.'],
-                        exp: '一般的に「犬」全般を表す場合は複数形の dogs を用います。'
-                    },
-                    {
-                        ja: 'ケンはどのような種類の料理を食べましたか。',
-                        en: ['What', 'kind', 'of', 'dishes', 'did', 'Ken', 'eat?'],
-                        exp: '「What kind of + 複数名詞」で「どのような種類の〜」を表す過去形の疑問文です。'
-                    },
-                    {
-                        ja: 'あなたはどこに住んでいますか。',
-                        en: ['Where', 'do', 'you', 'live?'],
-                        exp: '場所を尋ねる疑問詞 Where を用いた一般動詞の疑問文です。'
-                    },
-                    {
-                        ja: '明日の試験について緊張しています。',
-                        en: ['I\'m', 'nervous', 'about', 'the', 'exam', 'tomorrow.'],
-                        exp: '「be nervous about ~」で「〜について神経質になっている・緊張している」を表します。'
-                    },
-                    {
-                        ja: 'あなたはいつ宿題をしますか。',
-                        en: ['When', 'do', 'you', 'do', 'your', 'homework?'],
-                        exp: '時を尋ねる When に続く「do your homework（宿題をする）」の疑問文です。'
-                    },
-                    {
-                        ja: '今晩何か予定ある？',
-                        en: ['Do', 'you', 'have', 'any', 'plans', 'this', 'evening?'],
-                        exp: '疑問文における「いくつかの〜」は any を使用します（any plans）。'
-                    },
-                    {
-                        ja: '私はその部活のメンバーではありません。',
-                        en: ['I\'m', 'not', 'a', 'member', 'of', 'the', 'club.'],
-                        exp: '「Aのメンバー」は「a member of A」で表現します。'
-                    },
-                    {
-                        ja: 'あなたはいくつの言語を話せますか。',
-                        en: ['How', 'many', 'languages', 'can', 'you', 'speak?'],
-                        exp: '数えられる名詞の数を尋ねる「How many + 可算名詞の複数形」の構文です。'
-                    },
-                    {
-                        ja: '私はオンラインゲームをしません。',
-                        en: ['I', 'don\'t', 'play', 'online', 'games.'],
-                        exp: '一般動詞の現在否定文（don\'t + 動詞の原形）です。'
-                    },
-                    {
-                        ja: 'あなたはどうやって学校に来ますか。',
-                        en: ['How', 'do', 'you', 'come', 'to', 'school?'],
-                        exp: '手段や交通方法を尋ねる疑問詞 How を用いた疑問文です。'
-                    }
+                    { ja: 'あなたはどれくらいの頻度で外食しますか。', en: ['How', 'often', 'do', 'you', 'eat', 'out?'], exp: '頻度を尋ねる疑問詞「How often」に続く一般動詞の疑問文（do + S + V）です。' },
+                    { ja: '私たちの担任は優しいです。', en: ['Our', 'homeroom', 'teacher', 'is', 'kind.'], exp: '主語「Our homeroom teacher」に応じた be動詞 is を使用したSVC文型です。' },
+                    { ja: 'あなたはどの学校行事が好きですか。', en: ['Which', 'school', 'event', 'do', 'you', 'like?'], exp: '選択を求める疑問詞「Which + 名詞」の疑問文です。' },
+                    { ja: '彼は幸せではない。', en: ['He', 'isn\'t', 'happy.'], exp: 'be動詞の否定文（is + not / isn\'t）の基本構造です。' },
+                    { ja: '私たちにはどれくらいの（量の）宿題がありますか。', en: ['How', 'much', 'homework', 'do', 'we', 'have?'], exp: '数えられない名詞（homework）の量を尋ねる「How much + 不可算名詞」の疑問文です。' },
+                    { ja: '母はオンラインショッピングのためにインターネットを使います。', en: ['My', 'mother', 'uses', 'the', 'internet', 'for', 'online', 'shopping.'], exp: '三人称単数現在の主語（My mother）に合わせて動詞に s（uses）をつけます。' },
+                    { ja: '昨日の夜、あなたは何をしましたか。', en: ['What', 'did', 'you', 'do', 'last', 'night?'], exp: '過去の動作を尋ねる「What + did + S + 動詞の原形 ?」の疑問文です。' },
+                    { ja: '私は犬が好きです。', en: ['I', 'like', 'dogs.'], exp: '一般的に「犬」全般を表す場合は複数形の dogs を用います。' },
+                    { ja: 'ケンはどのような種類の料理を食べましたか。', en: ['What', 'kind', 'of', 'dishes', 'did', 'Ken', 'eat?'], exp: '「What kind of + 複数名詞」で「どのような種類の〜」を表す過去形の疑問文です。' },
+                    { ja: 'あなたはどこに住んでいますか。', en: ['Where', 'do', 'you', 'live?'], exp: '場所を尋ねる疑問詞 Where を用いた一般動詞の疑問文です。' },
+                    { ja: '明日の試験について緊張しています。', en: ['I\'m', 'nervous', 'about', 'the', 'exam', 'tomorrow.'], exp: '「be nervous about ~」で「〜について緊張している」を表します。' },
+                    { ja: 'あなたはいつ宿題をしますか。', en: ['When', 'do', 'you', 'do', 'your', 'homework?'], exp: '時を尋ねる When に続く「do your homework」の疑問文です。' },
+                    { ja: '私たちは幸せです。', en: ['We', 'are', 'happy.'], exp: '1人称複数 We に応じた be動詞 are です。' },
+                    { ja: 'あなたは犬が好きですか。', en: ['Do', 'you', 'like', 'dogs?'], exp: '一般動詞の疑問文（Do + S + 動詞の原形 ?）です。' },
+                    { ja: '今晩何か予定ある？', en: ['Do', 'you', 'have', 'any', 'plans', 'for', 'this', 'evening?'], exp: '疑問文における「いくつかの〜」は any を使用します。' },
+                    { ja: '私はその部活のメンバーではありません。', en: ['I\'m', 'not', 'a', 'member', 'of', 'the', 'club.'], exp: '「Aのメンバー」は「a member of A」で表現します。' },
+                    { ja: 'あなたのお兄さんは何歳ですか。', en: ['How', 'old', 'is', 'your', 'brother?'], exp: '年齢を尋ねる疑問詞「How old + be動詞 + 主語 ?」です。' },
+                    { ja: 'あなたはいくつの言語を話せますか。', en: ['How', 'many', 'languages', 'can', 'you', 'speak?'], exp: '数えられる名詞の数を尋ねる「How many + 複数名詞」の構文です。' },
+                    { ja: '私はオンラインゲームをしません。', en: ['I', 'don\'t', 'play', 'online', 'games.'], exp: '一般動詞の現在否定文（don\'t + 動詞の原形）です。' },
+                    { ja: 'あなたは幸せですか。', en: ['Are', 'you', 'happy?'], exp: '2人称 you に対応する be動詞の疑問文（Are you ~?）です。' },
+                    { ja: 'あなたはどうやって学校に来ますか。', en: ['How', 'do', 'you', 'come', 'to', 'school?'], exp: '交通手段や方法を尋ねる疑問詞 How を用いた疑問文です。' },
+                    { ja: '私は犬が好きではない。', en: ['I', 'don\'t', 'like', 'dogs.'], exp: '一般動詞の現在否定文（I don\'t + 動詞の原形）です。' }
                 ]
             },
             {
                 id: 'L2_L3_patterns',
                 title: 'Lesson 2-3: 基本文型 (第1〜第5文型)',
-                desc: 'SV / SVC / SVO / SVOO / SVOC の5つの基本文型と接続詞',
+                desc: 'SV / SVC / SVO / SVOO / SVOC の5つの基本文型と各種接続詞',
                 icon: 'fa-diagram-project',
                 color: 'from-violet-500 to-purple-600',
                 questions: [
-                    {
-                        ja: 'あなたは有名な歌手に似ています。',
-                        en: ['You', 'resemble', 'a', 'famous', 'singer.'],
-                        exp: 'S(You) + V(resemble) + O(a famous singer) の第3文型(SVO)です。resembleは目的語をとる他動詞です。'
-                    },
-                    {
-                        ja: '私のいとこはエンジニアです。',
-                        en: ['My', 'cousin', 'is', 'an', 'engineer.'],
-                        exp: 'S(My cousin) + V(is) + C(an engineer) の第2文型(SVC)です。S = C の関係が成り立ちます。'
-                    },
-                    {
-                        ja: '私たちの歴史の先生はとても若いです。',
-                        en: ['Our', 'history', 'teacher', 'is', 'very', 'young.'],
-                        exp: 'S(Our history teacher) + V(is) + C(very young) の第2文型(SVC)です。'
-                    },
-                    {
-                        ja: '私たちはケンを生徒会長に選んだ。',
-                        en: ['We', 'elected', 'Ken', 'student', 'council', 'president.'],
-                        exp: 'S(We) + V(elected) + O(Ken) + C(student council president) の第5文型(SVOC)です。'
-                    },
-                    {
-                        ja: '私はその犬をタローと名付けた。',
-                        en: ['I', 'named', 'the', 'dog', 'Taro.'],
-                        exp: 'S(I) + V(named) + O(the dog) + C(Taro) の第5文型(SVOC)です。O = Cの関係になります。'
-                    },
-                    {
-                        ja: '君を幸せにしてあげるよ。',
-                        en: ['I\'ll', 'make', 'you', 'happy.'],
-                        exp: 'S(I\'ll) + V(make) + O(you) + C(happy) の第5文型(SVOC)です。'
-                    },
-                    {
-                        ja: 'トムは私に好きだと言った。',
-                        en: ['Tom', 'told', 'me', 'he', 'loved', 'me.'],
-                        exp: 'S(Tom) + V(told) + O1(me) + O2(he loved me) の第4文型(SVOO)です。'
-                    },
-                    {
-                        ja: '私は中学校の運動会を楽しみました。',
-                        en: ['I', 'enjoyed', 'the', 'sports', 'day', 'in', 'junior', 'high', 'school.'],
-                        exp: 'S(I) + V(enjoyed) + O(the sports day) の第3文型(SVO)です。'
-                    },
-                    {
-                        ja: '修学旅行は私に素晴らしい思い出をくれました。',
-                        en: ['Our', 'school', 'trip', 'gave', 'me', 'wonderful', 'memories.'],
-                        exp: 'S(Our school trip) + V(gave) + O1(me) + O2(wonderful memories) の第4文型(SVOO)です。'
-                    },
-                    {
-                        ja: '母はよく料理の仕方を教えてくれます。',
-                        en: ['My', 'mother', 'often', 'teaches', 'me', 'how', 'to', 'cook.'],
-                        exp: 'S(My mother) + V(teaches) + O1(me) + O2(how to cook) の第4文型(SVOO)構造です。'
-                    },
-                    {
-                        ja: 'そのアプリが英語学習に役立つと分かりました。',
-                        en: ['I', 'found', 'the', 'app', 'useful', 'for', 'English', 'learning.'],
-                        exp: 'S(I) + V(found) + O(the app) + C(useful) の第5文型(SVOC)です。「OがCだとわかる」を表します。'
-                    },
-                    {
-                        ja: '私たちは彼をジミーと呼ぶ。',
-                        en: ['We', 'call', 'him', 'Jimmy.'],
-                        exp: 'S(We) + V(call) + O(him) + C(Jimmy) の第5文型(SVOC)です。'
-                    },
-                    {
-                        ja: 'そのドアを開けたままにしておいてくれますか。',
-                        en: ['Can', 'you', 'keep', 'the', 'door', 'open?'],
-                        exp: 'keep + O(the door) + C(open) の第5文型(SVOC)を用いた疑問文です。'
-                    },
-                    {
-                        ja: '私のクラスメートたちにクッキーを作りました。',
-                        en: ['I', 'made', 'my', 'classmates', 'some', 'cookies.'],
-                        exp: 'S(I) + V(made) + O1(my classmates) + O2(some cookies) の第4文型(SVOO)です。'
-                    },
-                    {
-                        ja: '両親は私にすてきなセーターを買ってくれた。',
-                        en: ['My', 'parents', 'bought', 'me', 'a', 'nice', 'sweater.'],
-                        exp: 'buy + O1(人) + O2(物) で「人に物を買い与える」という第4文型です。'
-                    },
-                    {
-                        ja: '友達は私の苗字にちなんで，私のことをタカと呼びます。',
-                        en: ['My', 'friends', 'call', 'me', 'Taka', 'after', 'my', 'family', 'name.'],
-                        exp: '「call O C after ~」で「〜にちなんでOをCと呼ぶ」という意味になります。'
-                    },
-                    {
-                        ja: 'この教室には30人の生徒がいます。',
-                        en: ['There', 'are', 'thirty', 'students', 'in', 'this', 'classroom.'],
-                        exp: '「There are + 複数名詞 + 場所」で「〜に…がいる・ある」を表す第1文型(SV)構文です。'
-                    }
+                    { ja: 'あなたは有名な歌手に似ています。', en: ['You', 'resemble', 'a', 'famous', 'singer.'], exp: 'S(You) + V(resemble) + O(a famous singer) の第3文型(SVO)です。' },
+                    { ja: '私のいとこはエンジニアです。', en: ['My', 'cousin', 'is', 'an', 'engineer.'], exp: 'S(My cousin) + V(is) + C(an engineer) の第2文型(SVC)です。' },
+                    { ja: '私たちの歴史の先生はとても若いです。', en: ['Our', 'history', 'teacher', 'is', 'very', 'young.'], exp: 'S(Our history teacher) + V(is) + C(very young) の第2文型(SVC)です。' },
+                    { ja: '私たちはケンを生徒会長に選んだ。', en: ['We', 'elected', 'Ken', 'student', 'council', 'president.'], exp: 'S(We) + V(elected) + O(Ken) + C(student council president) の第5文型(SVOC)です。' },
+                    { ja: '私はその犬をタローと名付けた。', en: ['I', 'named', 'the', 'dog', 'Taro.'], exp: 'S(I) + V(named) + O(the dog) + C(Taro) の第5文型(SVOC)です。' },
+                    { ja: '君を幸せにしてあげるよ。', en: ['I\'ll', 'make', 'you', 'happy.'], exp: 'S(I\'ll) + V(make) + O(you) + C(happy) の第5文型(SVOC)です。' },
+                    { ja: 'トムは私に好きだと言った。', en: ['Tom', 'told', 'me', 'he', 'loved', 'me.'], exp: 'S(Tom) + V(told) + O1(me) + O2(he loved me) の第4文型(SVOO)です。' },
+                    { ja: '私は中学校の運動会を楽しみました。', en: ['I', 'enjoyed', 'the', 'sports', 'day', 'in', 'junior', 'high', 'school.'], exp: 'S(I) + V(enjoyed) + O(the sports day...) の第3文型(SVO)です。' },
+                    { ja: '楽しそうですね。', en: ['You', 'look', 'happy.'], exp: 'S(You) + V(look) + C(happy) の第2文型(SVC)です。' },
+                    { ja: '修学旅行は私に素晴らしい思い出をくれました。', en: ['Our', 'school', 'trip', 'gave', 'me', 'wonderful', 'memories.'], exp: 'S(Our school trip) + V(gave) + O1(me) + O2(wonderful memories) の第4文型(SVOO)です。' },
+                    { ja: '母はよく料理の仕方を教えてくれます。', en: ['My', 'mother', 'often', 'teaches', 'me', 'how', 'to', 'cook.'], exp: 'teaches + O1(me) + O2(how to cook) の第4文型(SVOO)構造です。' },
+                    { ja: '彼はすばらしい選手だと私は思います。', en: ['I', 'think', 'that', 'he\'s', 'a', 'fantastic', 'player.'], exp: 'think + that節の目的語構造(SVO)です。' },
+                    { ja: '私たちは彼をジミーと呼ぶ。', en: ['We', 'call', 'him', 'Jimmy.'], exp: 'S(We) + V(call) + O(him) + C(Jimmy) の第5文型(SVOC)です。' },
+                    { ja: '彼女は引っ越してすぐに新しい友達ができた。', en: ['She', 'made', 'new', 'friends', 'as', 'soon', 'as', 'she', 'moved', 'there.'], exp: '接続詞 as soon as（〜するとすぐに）を用いた文です。' },
+                    { ja: '部活って楽しそうだね。', en: ['Club', 'activities', 'sound', 'fun.'], exp: 'S(Club activities) + V(sound) + C(fun) の第2文型(SVC)です。' },
+                    { ja: '残念ながら休み時間がもうすぐ終わります。', en: ['I\'m', 'afraid', 'that', 'the', 'break', 'will', 'be', 'over', 'soon.'], exp: '「I\'m afraid that ~」で「残念ながら〜と思う」を表します。' },
+                    { ja: '友達は私の苗字にちなんで，私のことをタカと呼びます。', en: ['My', 'friends', 'call', 'me', 'Taka', 'after', 'my', 'family', 'name.'], exp: '「call O C after ~」で「〜にちなんでOをCと呼ぶ」という意味です。' },
+                    { ja: 'そのアプリが英語学習に役立つと分かりました。', en: ['I', 'found', 'the', 'app', 'useful', 'for', 'English', 'learning.'], exp: 'S(I) + V(found) + O(the app) + C(useful) の第5文型(SVOC)です。' },
+                    { ja: 'あなたは私たちの学校の近くに住んでいるのですか。', en: ['Do', 'you', 'live', 'near', 'our', 'school?'], exp: '場所を表す前置詞句 near our school を伴う第1文型(SV)です。' },
+                    { ja: '私のクラスメートたちにクッキーを作りました。', en: ['I', 'made', 'my', 'classmates', 'some', 'cookies.'], exp: 'S(I) + V(made) + O1(my classmates) + O2(some cookies) の第4文型(SVOO)です。' },
+                    { ja: '両親は私にすてきなセーターを買ってくれた。', en: ['My', 'parents', 'bought', 'me', 'a', 'nice', 'sweater.'], exp: 'buy + O1(人) + O2(物) で「人に物を買い与える」第4文型です。' },
+                    { ja: '残念ながら私たちには今時間がありません。', en: ['I\'m', 'afraid', 'we', 'don\'t', 'have', 'time', 'right', 'now.'], exp: '「I\'m afraid + 節」で懸念や残念な気持ちを表します。' },
+                    { ja: 'シュンはその結果に満足していると思います。', en: ['I', 'think', 'that', 'Shun', 'is', 'happy', 'with', 'the', 'result.'], exp: '「be happy with ~」で「〜に満足している」を表します。' },
+                    { ja: '先生は私がなまけすぎだといつも言います。', en: ['My', 'teacher', 'always', 'says', 'that', 'I\'m', 'too', 'lazy.'], exp: 'S(My teacher) + V(says) + O(that節) の第3文型(SVO)構造です。' },
+                    { ja: 'あなたの電話番号を（教えて）くれませんか。', en: ['Can', 'you', 'give', 'me', 'your', 'phone', 'number?'], exp: 'give + O1(me) + O2(your phone number) の第4文型を用いた依頼表現です。' },
+                    { ja: 'あなたは電車で学校に来ているのですか。', en: ['Do', 'you', 'come', 'to', 'school', 'by', 'train?'], exp: '手段「by train」を伴う第1文型(SV)の疑問文です。' },
+                    { ja: 'そのドアを開けたままにしておいてくれますか。', en: ['Can', 'you', 'keep', 'the', 'door', 'open?'], exp: 'keep + O(the door) + C(open) の第5文型(SVOC)を用いた疑問文です。' },
+                    { ja: 'この教室には30人の生徒がいます。', en: ['There', 'are', 'thirty', 'students', 'in', 'this', 'classroom.'], exp: '「There are + 複数名詞」で存在を表す第1文型(SV)構文です。' },
+                    { ja: '両親はよく私に文句を言います。', en: ['My', 'parents', 'often', 'complain', 'to', 'me.'], exp: 'S(My parents) + V(complain) の第1文型(SV)です。' },
+                    { ja: '私の父は泳ぐのが本当に上手だ。', en: ['My', 'father', 'swims', 'really', 'well.'], exp: 'S(My father) + V(swims) の第1文型(SV)です。' },
+                    { ja: '私の父は週に１回，私に昼食を作ってくれます。', en: ['My', 'father', 'makes', 'me', 'lunch', 'once', 'a', 'week.'], exp: 'makes + O1(me) + O2(lunch) の第4文型(SVOO)です。' },
+                    { ja: 'ママ，犬がドアのところにいるよ。', en: ['Mommy,', 'there', 'is', 'a', 'dog', 'at', 'the', 'door.'], exp: 'There is + 単数名詞 の第1文型(SV)構造です。' },
+                    { ja: '私の母は料理が上手です。', en: ['My', 'mother', 'is', 'a', 'good', 'cook.'], exp: 'S(My mother) + V(is) + C(a good cook) の第2文型(SVC)です。' },
+                    { ja: 'それはすごいですね（それはすばらしいように聞こえますね）。', en: ['That', 'sounds', 'great.'], exp: 'S(That) + V(sounds) + C(great) の第2文型(SVC)です。' },
+                    { ja: '私はよくスパゲッティやピザを作ります。', en: ['I', 'often', 'make', 'spaghetti', 'or', 'pizza.'], exp: 'S(I) + V(make) + O(spaghetti or pizza) の第3文型(SVO)です。' },
+                    { ja: '私はこの制服のデザインが好きです。', en: ['I', 'like', 'the', 'design', 'of', 'this', 'school', 'uniform.'], exp: 'S(I) + V(like) + O(...) の第3文型(SVO)です。' },
+                    { ja: '私は1日8時間寝ません。', en: ['I', 'don\'t', 'sleep', 'eight', 'hours', 'a', 'day.'], exp: 'S(I) + V(don\'t sleep) の第1文型(SV)に時間を表す副詞句がついています。' },
+                    { ja: '私は新しいスマートフォンが欲しいです。', en: ['I', 'want', 'a', 'new', 'smartphone.'], exp: 'S(I) + V(want) + O(a new smartphone) の第3文型(SVO)です。' },
+                    { ja: '私は時間があるときにはたいてい料理をします。', en: ['I', 'usually', 'cook', 'when', 'I', 'have', 'time.'], exp: 'cook(第1文型) に when節（副詞節）が接続した文です。' },
+                    { ja: '彼は興味深い本を読んだ。', en: ['He', 'read', 'an', 'interesting', 'book.'], exp: 'S(He) + V(read) + O(an interesting book) の第3文型(SVO)です。' },
+                    { ja: 'その会議が終わった後，彼は自分に何ができるかを私に尋ねた。', en: ['After', 'the', 'meeting', 'ended,', 'he', 'asked', 'me', 'what', 'he', 'could', 'do.'], exp: 'S(he) + V(asked) + O1(me) + O2(what he could do) の第4文型(SVOO)です。' }
                 ]
             },
             {
                 id: 'L4_L5_tenses',
-                title: 'Lesson 4-5: 時制 (Tenses)',
-                desc: '現在・過去・未来・進行形・予定・意図表現',
+                title: 'Lesson 4-5: 時制・時間表現 (Tenses)',
+                desc: '現在・過去・未来・進行形・予定 (be going to / will)・習慣・不変の真理',
                 icon: 'fa-clock',
                 color: 'from-emerald-500 to-teal-600',
                 questions: [
-                    {
-                        ja: 'そのとき，彼らはルーシーとおしゃべりしていました。',
-                        en: ['They', 'were', 'chatting', 'with', 'Lucy', 'at', 'that', 'time.'],
-                        exp: '過去進行形 (were + chatting) で当時の進行中動作を表します。'
-                    },
-                    {
-                        ja: '私はあなたの優しさを決して忘れないでしょう。',
-                        en: ['I', 'will', 'never', 'forget', 'your', 'kindness.'],
-                        exp: '意志を表す助動詞 will と否定語 never を組み合わせた表現です。'
-                    },
-                    {
-                        ja: '私の親友はネコを1匹，犬を2匹飼っています。',
-                        en: ['My', 'best', 'friend', 'has', 'a', 'cat', 'and', 'two', 'dogs.'],
-                        exp: '現在の状態を表す現在形 has（3人称単数）を使用します。'
-                    },
-                    {
-                        ja: '私たちは日曜日にそのワークショップを訪れる予定です。',
-                        en: ['We', 'are', 'visiting', 'the', 'workshop', 'on', 'Sunday.'],
-                        exp: '現在進行形 (are visiting) で確実な近い未来の予定を表します。'
-                    },
-                    {
-                        ja: '私は電話があった時，入浴していました。',
-                        en: ['I', 'was', 'taking', 'a', 'bath', 'when', 'I', 'got', 'the', 'call.'],
-                        exp: '過去のある時点で進行中だった動作を表す過去進行形 (was taking) です。'
-                    },
-                    {
-                        ja: 'ケンは来週祖父母を訪れる予定です。',
-                        en: ['Ken', 'is', 'visiting', 'his', 'grandparents', 'next', 'week.'],
-                        exp: '現在進行形 (is visiting) を用いて未来の決定した予定を示します。'
-                    },
-                    {
-                        ja: 'あの子どもは今，何をしているのですか。',
-                        en: ['What', 'is', 'that', 'child', 'doing', 'now?'],
-                        exp: '現在進行形の疑問文 (What + is + 主語 + doing ?) です。'
-                    },
-                    {
-                        ja: '大学では科学技術を勉強するつもりです。',
-                        en: ['I', 'am', 'going', 'to', 'study', 'science', 'and', 'technology', 'at', 'university.'],
-                        exp: 'あらかじめ意図している未来の計画を表す be going to + 動詞の原形 です。'
-                    },
-                    {
-                        ja: '私の父は毎日，始発電車に乗ります。',
-                        en: ['My', 'dad', 'takes', 'the', 'first', 'train', 'every', 'day.'],
-                        exp: '日々の習慣的動作を表すため現在形 takes（3単現）を使います。'
-                    },
-                    {
-                        ja: 'ジェーンは明日，そのパーティーに来るだろうか。',
-                        en: ['Will', 'Jane', 'come', 'to', 'the', 'party', 'tomorrow?'],
-                        exp: '未来の予測・意図を尋ねる Will + 主語 + 動詞の原形 の疑問文です。'
-                    },
-                    {
-                        ja: '私はロンドンへの旅行を計画しているところです。',
-                        en: ['I', 'am', 'planning', 'a', 'trip', 'to', 'London.'],
-                        exp: '「今〜している」という現在進行形 (am planning) です。'
-                    },
-                    {
-                        ja: '私たちは5年前この町に引っ越してきました。',
-                        en: ['We', 'moved', 'to', 'this', 'town', 'five', 'years', 'ago.'],
-                        exp: '明確な過去の時点 (five years ago) を示す過去形 moved です。'
-                    },
-                    {
-                        ja: '地球は太陽の周りを回っている。',
-                        en: ['The', 'earth', 'goes', 'around', 'the', 'sun.'],
-                        exp: '不変の真理・自然現象を表すため常に現在形 (goes) を使います。'
-                    },
-                    {
-                        ja: 'わかった。すぐに彼女に電話を入れるよ。',
-                        en: ['OK,', 'I', 'will', 'phone', 'her', 'right', 'away.'],
-                        exp: 'その場で決めた即座の意志を表す will + 動詞の原形 です。'
-                    },
-                    {
-                        ja: '昨日は父が車で駅まで送ってくれた。',
-                        en: ['My', 'father', 'drove', 'me', 'to', 'the', 'station', 'yesterday.'],
-                        exp: '過去の特定の出来事（yesterday）を表す過去形 drove を使います。'
-                    },
-                    {
-                        ja: '自動運転車はこの町の空気をよりきれいにするでしょう。',
-                        en: ['Self-driving', 'cars', 'will', 'make', 'this', 'city\'s', 'air', 'cleaner.'],
-                        exp: '未来の予測・判断を表す will + 動詞の原形 (make) です。'
-                    }
+                    { ja: 'そのとき，彼らはルーシーとおしゃべりしていました。', en: ['They', 'were', 'chatting', 'with', 'Lucy', 'at', 'that', 'time.'], exp: '過去進行形 (were + chatting) で当時の動作を表します。' },
+                    { ja: '私はあなたの優しさを決して忘れないでしょう。', en: ['I', 'will', 'never', 'forget', 'your', 'kindness.'], exp: '意志の助動詞 will に否定語 never を組み合わせた文です。' },
+                    { ja: '私の親友はネコを1匹，犬を2匹飼っています。', en: ['My', 'best', 'friend', 'has', 'a', 'cat', 'and', 'two', 'dogs.'], exp: '現在の状態を表す現在形 has（3人称単数）です。' },
+                    { ja: 'ロビンは中国系カナダ人で，トロントに住んでいます。', en: ['Robin', 'is', 'Sino-Canadian', 'and', 'lives', 'in', 'Toronto.'], exp: '現在の状態を表す現在形の並列構造です。' },
+                    { ja: '自動運転車はこの町の空気をよりきれいにするでしょう。', en: ['Self-driving', 'cars', 'will', 'make', 'this', 'city\'s', 'air', 'cleaner.'], exp: '未来の予測を表す will + 動詞の原形 です。' },
+                    { ja: '私は電話があった時，入浴していました。', en: ['I', 'was', 'taking', 'a', 'bath', 'when', 'I', 'got', 'the', 'call.'], exp: '過去の進行中動作を表す過去進行形 (was taking) です。' },
+                    { ja: '私たちは日曜日にそのワークショップを訪れる予定です。', en: ['We', 'are', 'visiting', 'the', 'workshop', 'on', 'Sunday.'], exp: '現在進行形 (are visiting) で確定した近い未来の予定を表します。' },
+                    { ja: '私の父は今より若い頃，ゴルフをしていた。', en: ['My', 'father', 'used', 'to', 'play', 'golf', 'when', 'he', 'was', 'younger.'], exp: '「used to + 動詞の原形」で過去の継続的習慣を表します。' },
+                    { ja: '傘をもっていきなさい。あとで雨になるから。', en: ['Take', 'an', 'umbrella.', 'It', 'will', 'rain', 'later.'], exp: '未来の予測を表す will rain です。' },
+                    { ja: 'ケンは来週祖父母を訪れる予定です。', en: ['Ken', 'is', 'visiting', 'his', 'grandparents', 'next', 'week.'], exp: '現在進行形 (is visiting) で未来の予定を示します。' },
+                    { ja: '私は1つの言語を知っています。', en: ['I', 'know', 'one', 'language.'], exp: '状態を表す動詞 know の現在形です。' },
+                    { ja: 'その自動運転車はゴールラインの前で止まりかけていました。', en: ['The', 'self-driving', 'car', 'was', 'stopping', 'before', 'the', 'goal', 'line.'], exp: '過去進行形 (was stopping) で進行中の場面を描写します。' },
+                    { ja: 'あの子どもは今，何をしているのですか。', en: ['What', 'is', 'that', 'child', 'doing', 'now?'], exp: '現在進行形の疑問文 (What + is + 主語 + doing ?) です。' },
+                    { ja: '大学では科学技術を勉強するつもりです。', en: ['I', 'am', 'going', 'to', 'study', 'science', 'and', 'technology', 'at', 'university.'], exp: 'あらかじめ意図している未来の計画を表す be going to です。' },
+                    { ja: '私の父は毎日，始発電車に乗ります。', en: ['My', 'dad', 'takes', 'the', 'first', 'train', 'every', 'day.'], exp: '日々の習慣的動作を表すため現在形 takes を使います。' },
+                    { ja: 'ペドロは家にロボット掃除機を持っています。', en: ['Pedro', 'has', 'a', 'robot', 'vacuum', 'cleaner', 'at', 'home.'], exp: '現在の所有状態を表す現在形 has です。' },
+                    { ja: 'ジェーンは明日，そのパーティーに来るだろうか。', en: ['Will', 'Jane', 'come', 'to', 'the', 'party', 'tomorrow?'], exp: '未来の疑問文 Will + 主語 + 動詞の原形 です。' },
+                    { ja: 'お差し支えなければ明日お伺いします。', en: ['If', 'you', 'don\'t', 'mind,', 'I', 'will', 'visit', 'you', 'tomorrow.'], exp: '条件を表す if節の中は現在形 (don\'t mind) になります。' },
+                    { ja: 'その店は今，特別なイベントを開催しています。', en: ['The', 'store', 'is', 'holding', 'a', 'special', 'event', 'now.'], exp: '「今まさに進行中」の動作を表す現在進行形 (is holding) です。' },
+                    { ja: '私はロンドンへの旅行を計画しているところです。', en: ['I', 'am', 'planning', 'a', 'trip', 'to', 'London.'], exp: '現在進行形 (am planning) です。' },
+                    { ja: '雨が降り始めた。', en: ['It', 'started', 'to', 'rain.'], exp: '過去の出来事を表す過去形 (started) です。' },
+                    { ja: '私の誕生日は来週の月曜日です。', en: ['My', 'birthday', 'is', 'next', 'Monday.'], exp: '確定したカレンダー上の未来事項は現在形 is で表せます。' },
+                    { ja: '地球は太陽の周りを回っている。', en: ['The', 'earth', 'goes', 'around', 'the', 'sun.'], exp: '不変の真理・自然現象を表すため常に現在形 (goes) を使います。' },
+                    { ja: '私たちは5年前この町に引っ越してきました。', en: ['We', 'moved', 'to', 'this', 'town', 'five', 'years', 'ago.'], exp: '明確な過去の時点 (five years ago) を示す過去形 moved です。' },
+                    { ja: '親にロボット掃除機を買ってと頼んでみます。', en: ['I', 'will', 'ask', 'my', 'parents', 'to', 'buy', 'a', 'robot', 'vacuum', 'cleaner.'], exp: 'その場での意志を表す will ask です。' },
+                    { ja: 'そのワークショップは午後2時に始まります。', en: ['The', 'workshop', 'starts', 'at', '2', 'p.m.'], exp: 'タイムスケジュールや確定した未来は現在形 (starts) で表します。' },
+                    { ja: 'ケンは午後に宅配ドローンのブースを訪れることになっています。', en: ['Ken', 'is', 'visiting', 'the', 'delivery', 'drone', 'booth', 'in', 'the', 'afternoon.'], exp: '確定した予定を表す現在進行形 (is visiting) です。' },
+                    { ja: '毎週土曜の午前中にオンラインレッスンを受けています。', en: ['I', 'take', 'online', 'lessons', 'every', 'Saturday', 'morning.'], exp: '習慣的動作を表す現在形 take です。' },
+                    { ja: 'わかった。すぐに彼女に電話を入れるよ。', en: ['OK,', 'I', 'will', 'phone', 'her', 'right', 'away.'], exp: 'その場での意思決定を表す will + 動詞の原形 です。' },
+                    { ja: '私は宅配ドローンのブースを訪れました。', en: ['I', 'visited', 'the', 'delivery', 'drone', 'booth.'], exp: '過去の出来事を表す過去形 visited です。' },
+                    { ja: 'スマートウォッチが出てくる前は普通の腕時計を使っていました。', en: ['I', 'used', 'a', 'regular', 'wristwatch', 'before', 'smartwatches', 'came', 'out.'], exp: '過去の状態を表す過去形 used です。' },
+                    { ja: 'AIは膨大なデータに依存しています。', en: ['AI', 'relies', 'on', 'a', 'vast', 'amount', 'of', 'data.'], exp: '一般的な事実や状態を表す現在形 relies です。' },
+                    { ja: '彼はそのとき展示会のことを話していました。', en: ['He', 'was', 'talking', 'about', 'the', 'exhibition', 'at', 'that', 'time.'], exp: '過去のある時点での進行中動作を表す過去進行形 (was talking) です。' },
+                    { ja: 'もうすぐ雨になるよ。', en: ['It', 'is', 'going', 'to', 'rain', 'soon.'], exp: '目に見える兆候に基づいた未来の予測 (is going to rain) です。' },
+                    { ja: 'あなたはパーティーをするつもりですか。', en: ['Are', 'you', 'going', 'to', 'have', 'a', 'party?'], exp: '意図・計画を尋ねる be going to の疑問文です。' },
+                    { ja: 'このパソコンは過熱している。すぐに壊れるよ。', en: ['This', 'computer', 'is', 'overheating.', 'It', 'will', 'break', 'soon.'], exp: '進行形 (is overheating) と未来の推測 (will break) の組み合わせです。' },
+                    { ja: '私は木曜日にケイコと映画を見る予定です。', en: ['I', 'am', 'seeing', 'Keiko', 'on', 'Thursday.'], exp: '取り決めた予定を表す現在進行形 (am seeing) です。' },
+                    { ja: 'そのコンサートは4時に始まります。', en: ['The', 'concert', 'starts', 'at', 'four.'], exp: '時刻表・スケジュールの現在形 (starts) です。' }
                 ]
             },
             {
                 id: 'L6_L7_perfect',
                 title: 'Lesson 6-7: 完了形 (Perfect Tenses)',
-                desc: '現在完了・過去完了・未来完了（継続・経験・完了・結果）',
+                desc: '現在完了・過去完了・未来完了（継続・経験・完了・結果・進行形）',
                 icon: 'fa-hourglass-half',
                 color: 'from-amber-500 to-orange-600',
                 questions: [
-                    {
-                        ja: 'ケンとジェーンは10年間知り合いです。',
-                        en: ['Ken', 'and', 'Jane', 'have', 'known', 'each', 'other', 'for', '10', 'years.'],
-                        exp: '過去から現在まで状態が続いている【継続】の現在完了形 (have known) です。'
-                    },
-                    {
-                        ja: '私は今朝からずっと自分の部屋を掃除し続けているんです。',
-                        en: ['I\'ve', 'been', 'cleaning', 'my', 'room', 'since', 'this', 'morning.'],
-                        exp: '過去から現在まで動作が継続している【現在完了進行形】(have been cleaning) です。'
-                    },
-                    {
-                        ja: 'そのカフェは開店して以来ずっと人気があります。',
-                        en: ['The', 'cafe', 'has', 'been', 'popular', 'since', 'it', 'opened.'],
-                        exp: 'since + 過去の起点 を伴う現在完了形の継続表現 (has been) です。'
-                    },
-                    {
-                        ja: '私は本を読んでいたから，映画のエンディングを知っていました。',
-                        en: ['I', 'knew', 'the', 'ending', 'of', 'the', 'movie', 'because', 'I', 'had', 'read', 'the', 'book.'],
-                        exp: '過去の時点 (knew) よりも前に発生した完了・経験を表す【過去完了形】(had read) です。'
-                    },
-                    {
-                        ja: '私の叔父は先月からずっと入院しています。',
-                        en: ['My', 'uncle', 'has', 'been', 'in', 'the', 'hospital', 'since', 'last', 'month.'],
-                        exp: '「先月からずっと」状態が続いている現在完了形 (has been) です。'
-                    },
-                    {
-                        ja: '見て！ 雨がやんだわ。',
-                        en: ['Look!', 'It', 'has', 'stopped', 'raining.'],
-                        exp: '「雨がやんだ（結果、今降っていない）」という【完了・結果】を表す現在完了形です。'
-                    },
-                    {
-                        ja: '今までにカナダに行ったことはありますか。',
-                        en: ['Have', 'you', 'ever', 'been', 'to', 'Canada?'],
-                        exp: '「〜に行ったことがある」という経験を尋ねる Have you ever been to ~ ? です。'
-                    },
-                    {
-                        ja: '私はすでに昼食を食べ終えました。',
-                        en: ['I', 'have', 'already', 'finished', 'eating', 'lunch.'],
-                        exp: '動作の【完了】を表す have + already + 過去分詞 (finished) です。'
-                    },
-                    {
-                        ja: '私たちは長い間ここに住んでいます。',
-                        en: ['We', 'have', 'lived', 'here', 'for', 'a', 'long', 'time.'],
-                        exp: '期間 (for a long time) を伴う現在完了形【継続】の文法表現です。'
-                    },
-                    {
-                        ja: 'その試合は私がスタジアムに着いたときには，すでに始まっていました。',
-                        en: ['The', 'game', 'had', 'already', 'started', 'when', 'I', 'got', 'to', 'the', 'stadium.'],
-                        exp: '過去の基準点 (got) より前に完了していた動作を表す【過去完了形】(had already started) です。'
-                    },
-                    {
-                        ja: '私の弟は宿題を終えました。',
-                        en: ['My', 'brother', 'has', 'finished', 'his', 'homework.'],
-                        exp: '動作が完了した結果を表す現在完了形 (has finished) です。'
-                    },
-                    {
-                        ja: '私は7年間英語を勉強しています。',
-                        en: ['I', 'have', 'been', 'studying', 'English', 'for', 'seven', 'years.'],
-                        exp: '動作の継続を強調する現在完了進行形 (have been studying) です。'
-                    },
-                    {
-                        ja: '私は10時までには宿題を終わらせていますよ。',
-                        en: ['I', 'will', 'have', 'finished', 'my', 'homework', 'by', 'ten.'],
-                        exp: '未来のある時点での完了を表す【未来完了形】(will have finished) です。'
-                    },
-                    {
-                        ja: 'この神社は，1000年ここにあります。',
-                        en: ['This', 'shrine', 'has', 'been', 'here', 'for', 'a', 'thousand', 'years.'],
-                        exp: '1000年という長い期間の存在を表す現在完了形 (has been) です。'
-                    },
-                    {
-                        ja: '弟なら近くのレストランに行ったよ（行ってしまっていません）。',
-                        en: ['My', 'brother', 'has', 'gone', 'to', 'the', 'nearby', 'restaurant.'],
-                        exp: '「have gone to ~」で「〜に行ってしまっていまここにはいない（結果）」を表します。'
-                    }
+                    { ja: 'ケンとジェーンは10年間知り合いです。', en: ['Ken', 'and', 'Jane', 'have', 'known', 'each', 'other', 'for', '10', 'years.'], exp: '【継続】の現在完了形 (have known) です。' },
+                    { ja: '私は今朝からずっと自分の部屋を掃除し続けているんです。', en: ['I\'ve', 'been', 'cleaning', 'my', 'room', 'since', 'this', 'morning.'], exp: '【現在完了進行形】(have been cleaning) です。' },
+                    { ja: 'そのカフェは開店して以来ずっと人気があります。', en: ['The', 'café', 'has', 'been', 'popular', 'since', 'it', 'opened.'], exp: 'since + 過去の起点を伴う現在完了形 (has been) です。' },
+                    { ja: '私は本を読んでいたから，映画のエンディングを知っていました。', en: ['I', 'knew', 'the', 'ending', 'of', 'the', 'movie', 'because', 'I', 'had', 'read', 'the', 'book.'], exp: '【過去完了形】(had read) です。' },
+                    { ja: '私の叔父は先月からずっと入院しています。', en: ['My', 'uncle', 'has', 'been', 'in', 'the', 'hospital', 'since', 'last', 'month.'], exp: '現在完了形 (has been) です。' },
+                    { ja: '駅の近くに新しい書店がオープンしたの知ってた？', en: ['Did', 'you', 'know', 'that', 'a', 'new', 'bookstore', 'has', 'opened', 'near', 'the', 'station?'], exp: '従属節内で「オープンした（完了・結果）」を表す現在完了形 (has opened) を使用しています。' },
+                    { ja: 'あなたと会う前に，そのカフェで30分ほど本を読んでいました。', en: ['Before', 'I', 'met', 'you,', 'I', 'had', 'been', 'reading', 'a', 'book', 'at', 'the', 'café', 'for', 'about', '30', 'minutes.'], exp: '過去のある時点までの継続的動作を表す【過去完了進行形】(had been reading) です。' },
+                    { ja: '私の父は風邪をひいてしまいました。', en: ['My', 'father', 'has', 'caught', 'a', 'cold.'], exp: '【完了・結果】を表す現在完了形 (has caught) です。' },
+                    { ja: '弟なら近くのレストランに行ったよ。', en: ['My', 'brother', 'has', 'gone', 'to', 'the', 'nearby', 'restaurant.'], exp: '「have gone to ~」で「行ってしまっていまはいない（結果）」を表します。' },
+                    { ja: '見て！ 雨がやんだわ。', en: ['Look!', 'It\'s', 'stopped', 'raining.'], exp: '【完了・結果】を表す現在完了形です。' },
+                    { ja: '今までにカナダに行ったことはありますか。', en: ['Have', 'you', 'ever', 'been', 'to', 'Canada?'], exp: '【経験】を尋ねる Have you ever been to ~ ? です。' },
+                    { ja: 'あなたがこの町を出た時，そのレストランはまだ開店していませんでした。', en: ['When', 'you', 'left', 'this', 'town,', 'the', 'restaurant', 'hadn\'t', 'opened', 'yet.'], exp: '過去のある時点での未完了を表す【過去完了形】(hadn\'t opened) です。' },
+                    { ja: '私がこの町を出る前，その家は何年も空き家のままだったよ。', en: ['Before', 'I', 'left', 'this', 'town,', 'the', 'house', 'had', 'been', 'empty', 'for', 'years.'], exp: '過去のある時点までの状態の継続を表す【過去完了形】(had been) です。' },
+                    { ja: 'あなたが野球部を辞めたことを，ちょうど聞いたところです。', en: ['I', 'have', 'just', 'heard', 'that', 'you', 'quit', 'the', 'baseball', 'club.'], exp: 'ちょうど完了したことを表す「have just + 過去分詞」の構文です。' },
+                    { ja: '私たちは長い間ここに住んでいます。', en: ['We', 'have', 'lived', 'here', 'for', 'a', 'long', 'time.'], exp: '現在完了形【継続】の表現です。' },
+                    { ja: 'ジェーンは去年から旅し続けている。', en: ['Jane', 'has', 'been', 'traveling', 'since', 'last', 'year.'], exp: '過去から現在まで動作が継続していることを表す【現在完了進行形】です。' },
+                    { ja: '私はすでに昼食を食べ終えました。', en: ['I', 'have', 'already', 'finished', 'eating', 'lunch.'], exp: '【完了】を表す have + already + 過去分詞 です。' },
+                    { ja: '私の祖父は1年間車を運転していません。', en: ['My', 'grandfather', 'has', 'not', 'driven', 'a', 'car', 'for', 'one', 'year.'], exp: '継続的な否定状態を表す現在完了形 (has not driven) です。' },
+                    { ja: '私たちの村に来てみようと思ったことはありますか。', en: ['Have', 'you', 'ever', 'thought', 'of', 'coming', 'to', 'our', 'village?'], exp: '【経験】を尋ねる「Have you ever + 過去分詞 ?」の構文です。' },
+                    { ja: 'だいじょうぶ。あなたの部屋を掃除しておいたわよ。', en: ['Don\'t', 'worry.', 'I\'ve', 'cleaned', 'your', 'room.'], exp: '動作が完了してその結果が現在に残っていることを表す現在完了形です。' },
+                    { ja: 'その学校は1年前に閉校していたと分かりました。', en: ['I', 'found', 'that', 'the', 'school', 'had', 'closed', 'down', 'one', 'year', 'before.'], exp: '「〜だと分かった(過去)」より前の出来事を表す【過去完了形】(had closed down) です。' },
+                    { ja: '彼らは結婚する前に7年間，知り合いだったんですよ。', en: ['They', 'had', 'known', 'each', 'other', 'for', 'seven', 'years', 'before', 'they', 'got', 'married.'], exp: '過去に結婚するまでの7年間の継続を表す【過去完了形】です。' },
+                    { ja: 'ゲームが始まる頃までには，雨は止んでいた。', en: ['By', 'the', 'time', 'the', 'game', 'started,', 'it', 'had', 'stopped', 'raining.'], exp: '「By the time + 過去形」と組み合わせた【過去完了形】(had stopped) です。' },
+                    { ja: 'その試合は私がスタジアムに着いたときには，すでに始まっていました。', en: ['The', 'game', 'had', 'already', 'started', 'when', 'I', 'got', 'to', 'the', 'stadium.'], exp: '【過去完了形】(had already started) です。' },
+                    { ja: '去年からずっと本をネットで買っているんだ。', en: ['I\'ve', 'been', 'buying', 'books', 'online', 'since', 'last', 'year.'], exp: '過去から現在まで継続している動作を表す【現在完了進行形】です。' },
+                    { ja: '今年買う前は，私はスマートフォンを使ったことがありませんでした。', en: ['I', 'had', 'never', 'used', 'a', 'smartphone', 'before', 'I', 'bought', 'one', 'this', 'year.'], exp: '過去のある時点までの【経験】の否定を表す【過去完了形】です。' },
+                    { ja: '私は7年間英語を勉強しています。', en: ['I', 'have', 'been', 'studying', 'English', 'for', 'seven', 'years.'], exp: '現在完了進行形 (have been studying) です。' },
+                    { ja: '私たちはロサンゼルスのユニバーサルスタジオに行ったことがあります。', en: ['We\'ve', 'been', 'to', 'Universal', 'Studios', 'in', 'Los', 'Angeles.'], exp: '「have been to ~」で「〜に行ったことがある（経験）」を表します。' },
+                    { ja: '父は長い小説をちょうど読み終えたところだ。', en: ['My', 'father', 'has', 'just', 'finished', 'reading', 'a', 'long', 'novel.'], exp: 'ちょうど完了した動作を表す「has just finished」です。' },
+                    { ja: '私の弟は宿題を終えました。', en: ['My', 'brother', 'has', 'finished', 'his', 'homework.'], exp: '現在完了形 (has finished) です。' },
+                    { ja: '私の母は買い物に出かけてしまいました。', en: ['My', 'mother', 'has', 'gone', 'shopping.'], exp: '「has gone shopping」で「買い物に行ってしまった（ここにはいない）」を表します。' },
+                    { ja: '私が目を覚ましたとき，母はすでに外出していました。', en: ['When', 'I', 'woke', 'up,', 'my', 'mother', 'had', 'already', 'gone', 'out.'], exp: '目を覚ました過去の時点ですでに外出していたことを表す【過去完了形】です。' },
+                    { ja: 'あなたは英語で履歴書を書いたことがありますか。', en: ['Have', 'you', 'ever', 'written', 'a', 'resume', 'in', 'English?'], exp: '経験を尋ねる「Have you ever + 過去分詞 ?」です。' },
+                    { ja: '私はシャツを洗いました。', en: ['I', 'have', 'washed', 'my', 'shirt.'], exp: 'シャツを洗って今はきれいになっているという状態・完了を表します。' },
+                    { ja: '私たちは3年間ずっとチームメートです。', en: ['We\'ve', 'been', 'teammates', 'for', 'three', 'years.'], exp: '状態の継続を表す現在完了形 (have been) です。' },
+                    { ja: 'その学校が閉校する前， 私の友だちと私は学園祭に参加するためにそこに行ったことがありました。', en: ['Before', 'the', 'school', 'closed,', 'my', 'friend', 'and', 'I', 'had', 'been', 'there', 'to', 'join', 'the', 'school', 'festival.'], exp: '過去の時点までの経験を表す【過去完了形】です。' },
+                    { ja: '私たちは1時間バスを待ち続けています。', en: ['We', 'have', 'been', 'waiting', 'for', 'the', 'bus', 'for', 'an', 'hour.'], exp: '現在まで継続している動作を表す【現在完了進行形】です。' },
+                    { ja: '弟は今朝からオンラインゲームをし続けています。', en: ['My', 'brother', 'has', 'been', 'playing', 'an', 'online', 'game', 'since', 'this', 'morning.'], exp: '動作の継続を表す【現在完了進行形】です。' },
+                    { ja: '私は10時までには宿題を終わらせているよ。', en: ['I', 'will', 'have', 'finished', 'my', 'homework', 'by', 'ten.'], exp: '【未来完了形】(will have finished) です。' },
+                    { ja: '今日の野球の試合は9時までには終わっているでしょう。', en: ['Today\'s', 'baseball', 'game', 'will', 'have', 'finished', 'by', 'nine', 'o\'clock.'], exp: '未来のある時点での完了を予測する【未来完了形】です。' },
+                    { ja: '私はそんなに個性的な書店を見たことがありません。', en: ['I\'ve', 'never', 'seen', 'such', 'a', 'unique', 'bookstore.'], exp: '経験の否定を表す「have never + 過去分詞」です。' },
+                    { ja: '母は出かけてしまって，今ここにいません。', en: ['My', 'mother', 'has', 'gone', 'out', 'and', 'is', 'not', 'here', 'now.'], exp: '「has gone out」で「出かけてしまっていまはいない」結果を表します。' },
+                    { ja: '長野へ行くまで，私はスキーをしたことがありませんでした。', en: ['I', 'had', 'never', 'skied', 'before', 'I', 'went', 'to', 'Nagano.'], exp: '過去のある時点までの経験否定を表す【過去完了形】です。' },
+                    { ja: '私が二十歳になるまでには，より多くの人がこの町に引っ越してきているでしょう。', en: ['By', 'the', 'time', 'I', 'am', '20,', 'more', 'people', 'will', 'have', 'moved', 'to', 'this', 'town.'], exp: '未来の時点での完了を予測する【未来完了形】です。' },
+                    { ja: 'この神社は，1000年ここにあります。', en: ['This', 'shrine', 'has', 'been', 'here', 'for', 'a', 'thousand', 'years.'], exp: '状態の継続を表す現在完了形です。' }
                 ]
             },
             {
                 id: 'L8_L10_auxiliary',
                 title: 'Lesson 8-10: 助動詞 (Auxiliary Verbs)',
-                desc: 'can / must / should / may / have to / had better などの意図・義務・提案表現',
+                desc: 'can / must / should / may / have to / had better / 過去への推測など（全60問）',
                 icon: 'fa-bolt',
                 color: 'from-rose-500 to-pink-600',
                 questions: [
-                    {
-                        ja: 'あなたは今すぐ部屋を掃除しなければなりません。',
-                        en: ['You', 'must', 'clean', 'your', 'room', 'right', 'now.'],
-                        exp: 'must + 動詞の原形 で強い義務・命令「〜しなければならない」を表します。'
-                    },
-                    {
-                        ja: '私は英語をとても上手に話すことができます。',
-                        en: ['I', 'can', 'speak', 'English', 'very', 'well.'],
-                        exp: '能力・可能を表す助動詞 can + 動詞の原形 (speak) です。'
-                    },
-                    {
-                        ja: '私たちはもっと野菜を食べるべきです。',
-                        en: ['We', 'should', 'eat', 'more', 'vegetables.'],
-                        exp: 'should は「〜した方がよい / 〜すべきだ」というアドバイス・義務を表します。'
-                    },
-                    {
-                        ja: 'ここで写真を撮ってもいいですか？',
-                        en: ['May', 'I', 'take', 'a', 'photo', 'here?'],
-                        exp: 'May I ~ ? は丁寧な許可を求める表現「〜してもよろしいですか？」です。'
-                    },
-                    {
-                        ja: '図書館では静かにしなければなりません。',
-                        en: ['You', 'have', 'to', 'be', 'quiet', 'in', 'the', 'library.'],
-                        exp: 'have to + 動詞の原形 (be) で義務「〜しなければならない」を表します。'
-                    },
-                    {
-                        ja: '彼は今日ここに来ないかもしれない。',
-                        en: ['He', 'may', 'not', 'come', 'here', 'today.'],
-                        exp: 'may not は「〜でないかもしれない」という推測の否定を表します。'
-                    },
-                    {
-                        ja: '窓を開けていただけますか？',
-                        en: ['Could', 'you', 'open', 'the', 'window,', 'please?'],
-                        exp: 'Could you ~ ? は丁寧な依頼「〜していただけますか？」を表します。'
-                    },
-                    {
-                        ja: '温かい紅茶はいかがですか？',
-                        en: ['Would', 'you', 'like', 'a', 'cup', 'of', 'hot', 'tea?'],
-                        exp: 'Would you like ~ ? で丁寧に勧める表現「〜はいかがですか」になります。'
-                    },
-                    {
-                        ja: '遅れないように早く出発したほうがいいよ。',
-                        en: ['You', 'had', 'better', 'leave', 'early.'],
-                        exp: 'had better + 動詞の原形 で強いアドバイス「〜したほうがいい」を表します。'
-                    },
-                    {
-                        ja: '以前はこの近くに大きな公園がありました。',
-                        en: ['There', 'used', 'to', 'be', 'a', 'big', 'park', 'near', 'here.'],
-                        exp: 'used to + 動詞の原形 で「かつて〜があった（過去の状態・習慣）」を表します。'
-                    }
+                    { ja: '2階の洗面所を使ってもよろしいですか。', en: ['May', 'I', 'use', 'the', 'restroom', 'on', 'the', 'second', 'floor?'], exp: '「May I ~?」で「〜してもよろしいですか」という丁寧な許可の求めを表します。' },
+                    { ja: 'お手伝いしましょうか。', en: ['Shall', 'I', 'help', 'you?'], exp: '「Shall I ~?」で「（私が）〜しましょうか」という申し出を表します。' },
+                    { ja: 'その道具は、前回の災害の時に役に立ったかもしれない。', en: ['The', 'tool', 'may', 'have', 'been', 'useful', 'during', 'the', 'last', 'disaster.'], exp: '「may have + 過去分詞」で「〜だったかもしれない（過去の推測）」を表します。' },
+                    { ja: '怪我が大したことないの？ホッとしたでしょう！', en: ['The', 'injury', 'isn\'t', 'serious?', 'You', 'must', 'be', 'relieved!'], exp: '「must + 動詞の原形」で「〜に違いない」という強い確信の推測を表します。' },
+                    { ja: '彼がそんなことを言ったはずがない。', en: ['He', 'can\'t', 'have', 'said', 'that.'], exp: '「can\'t have + 過去分詞」で「〜したはずがない（過去の打ち消しの推測）」を表します。' },
+                    { ja: '私の消しゴム使ってもいいよ。', en: ['You', 'can', 'use', 'my', 'eraser.'], exp: '助動詞「can」で「〜してもよい」という許可を表します。' },
+                    { ja: '私はもっと一生懸命勉強すべきだった（のに実際にはしなかった）。', en: ['I', 'should', 'have', 'studied', 'harder.'], exp: '「should have + 過去分詞」で「〜すべきだった（のにしなかった）」という後悔・非難を表します。' },
+                    { ja: '手伝ってあげるよ。', en: ['I\'ll', 'give', 'you', 'a', 'hand.'], exp: '「will (I\'ll)」でその場での意志「〜してあげるよ」を表します。' },
+                    { ja: '地震が前兆なしに起きるはずがないと信じる人もいます。', en: ['Some', 'believe', 'that', 'earthquakes', 'can\'t', 'occur', 'without', 'signs.'], exp: '「can\'t + 原形」で「〜するはずがない」という強い否定の推測を表します。' },
+                    { ja: '身分証明書なしでこの区域に入ることはできません。', en: ['You', 'can\'t', 'enter', 'this', 'area', 'without', 'your', 'ID', 'card.'], exp: '「can\'t」で「〜してはいけない／〜できない」という禁止・不可能性を表します。' },
+                    { ja: '救急車を呼んだほうがいいよ！', en: ['You\'d', 'better', 'call', 'an', 'ambulance!'], exp: '「had better + 原形」で「〜したほうがいい（忠告・強い勧め）」を表します。' },
+                    { ja: '私たちは大きな台風に備えなければなりません。', en: ['We', 'must', 'prepare', 'for', 'the', 'big', 'typhoon.'], exp: '「must + 原形」で「〜しなければならない」という強い義務を表します。' },
+                    { ja: '彼女に何かあったのかもしれない。', en: ['Something', 'may', 'have', 'happened', 'to', 'her.'], exp: '「may have + 過去分詞」で「〜したかもしれない（過去の推測）」を表します。' },
+                    { ja: '災害に備えて水と食料が欲しいのですが。', en: ['I', 'would', 'like', 'some', 'water', 'and', 'food', 'to', 'prepare', 'for', 'disasters.'], exp: '「would like ~」で「〜が欲しいのですが」という丁寧な欲望を表します。' },
+                    { ja: '窓を開けていただけますか。', en: ['Could', 'you', 'open', 'the', 'window?'], exp: '「Could you ~?」で「〜していただけますか」という丁寧な依頼を表します。' },
+                    { ja: '入ってもよろしいでしょうか。', en: ['May', 'I', 'come', 'in?'], exp: '「May I ~?」で丁寧な許可を求める表現です。' },
+                    { ja: '彼らは非常用備蓄品を持っていなかったので、安心できたはずがない。', en: ['They', 'can\'t', 'have', 'felt', 'safe', 'because', 'they', 'had', 'no', 'emergency', 'supplies.'], exp: '「can\'t have + 過去分詞」で「〜であったはずがない」という推測を表します。' },
+                    { ja: 'あなたたちはこのレポートを時間どおりに仕上げなければなりません。', en: ['You', 'must', 'finish', 'this', 'report', 'on', 'time.'], exp: '「must」で義務「〜しなければならない」を表します。' },
+                    { ja: '明日は台風だから外出しないほうがいいよ。', en: ['You', 'had', 'better', 'not', 'go', 'out', 'tomorrow', 'because', 'of', 'the', 'typhoon.'], exp: '「had better not + 原形」で「〜しないほうがいい（否定の忠告）」を表します。' },
+                    { ja: '手伝ってくれる？', en: ['Can', 'you', 'give', 'me', 'a', 'hand?'], exp: '「Can you ~?」で「〜してくれる？」というカジュアルな依頼を表します。' },
+                    { ja: '避難所の場所を確認するべきです。', en: ['You', 'ought', 'to', 'check', 'the', 'location', 'of', 'the', 'evacuation', 'shelter.'], exp: '「ought to + 原形」で「〜すべきである」という義務・義務的助言を表します。' },
+                    { ja: '先月の台風の間、多くの人が大変な目にあったに違いない。', en: ['Many', 'people', 'must', 'have', 'had', 'a', 'hard', 'time', 'during', 'the', 'typhoon', 'last', 'month.'], exp: '「must have + 過去分詞」で「〜だったに違いない（過去の強い確信）」を表します。' },
+                    { ja: '自然災害に備えて非常食と水を蓄えるべきです。', en: ['You', 'should', 'store', 'emergency', 'food', 'and', 'water', 'in', 'case', 'of', 'a', 'natural', 'disaster.'], exp: '「should」で「〜すべきだ」というアドバイス・義務を表します。' },
+                    { ja: '台風がこのあたりを襲うかもしれない。', en: ['The', 'typhoon', 'may', 'hit', 'around', 'here.'], exp: '「may + 原形」で「〜かもしれない」という現在・未来の推測を表します。' },
+                    { ja: 'ケンジは100メートルを11秒で走ることができます。', en: ['Kenji', 'can', 'run', '100', 'meters', 'in', '11', 'seconds.'], exp: '「can」で能力・可能「〜できる」を表します。' },
+                    { ja: '私は以前、群馬に住んでいました。', en: ['I', 'used', 'to', 'live', 'in', 'Gunma.'], exp: '「used to + 原形」で「かつて〜だった（過去の状態・継続的習慣）」を表します。' },
+                    { ja: '避難所への行き方を教えましょうか。', en: ['Shall', 'I', 'tell', 'you', 'how', 'to', 'get', 'to', 'the', 'evacuation', 'shelter?'], exp: '「Shall I ~?」で「〜しましょうか」という親切な提案を表します。' },
+                    { ja: 'あなたはこの非常食を持って行ってよいです。', en: ['You', 'may', 'take', 'this', 'emergency', 'food.'], exp: '「may」で「〜してもよい」という許可を表します。' },
+                    { ja: 'あなたはお金の使い方にもっと注意すべきです。', en: ['You', 'should', 'be', 'more', 'careful', 'with', 'your', 'money.'], exp: '「should」で助言「〜すべきだ」を表します。' },
+                    { ja: 'そこでは夏でも寒くなることがあります。', en: ['It', 'can', 'be', 'cold', 'even', 'in', 'summer', 'there.'], exp: '「can」で「〜することがある（理論上の可能性）」を表します。' },
+                    { ja: 'それは本当のはずがない。', en: ['That', 'can\'t', 'be', 'true.'], exp: '「can\'t + 原形」で「〜なはずがない」という強い否定の確信を表します。' },
+                    { ja: '大きな台風が襲うので危険になり得ます。', en: ['It', 'can', 'be', 'dangerous', 'because', 'the', 'big', 'typhoon', 'will', 'hit.'], exp: '「can」で「〜であり得る（可能性）」を表します。' },
+                    { ja: '母は今頃もう家に着いているはずだ。', en: ['My', 'mom', 'should', 'have', 'arrived', 'home', 'by', 'now.'], exp: '「should have + 過去分詞」で「今頃は〜しているはずだ（強い期待・推測）」を表します。' },
+                    { ja: '水がすべて売り切れた。それなら、私は緑茶を買おう。', en: ['All', 'the', 'water', 'is', 'sold', 'out.', 'Then,', 'I', 'will', 'buy', 'green', 'tea.'], exp: '「will」で「〜しよう」というその場での意志を表します。' },
+                    { ja: '私はあなたのアドバイスに従うべきだった（のに従わなかった）。', en: ['I', 'should', 'have', 'taken', 'your', 'advice.'], exp: '「should have + 過去分詞」で過去の後悔「〜すべきだった」を表します。' },
+                    { ja: '避難する最中にモバイルバッテリーを落としたかもしれない。', en: ['I', 'could', 'have', 'dropped', 'my', 'mobile', 'battery', 'while', 'evacuating.'], exp: '「could have + 過去分詞」で「〜したかもしれない（ひょっとすると〜だった）」を表します。' },
+                    { ja: 'かつては非常食を家に備えていました。', en: ['I', 'used', 'to', 'keep', 'emergency', 'food', 'at', 'home.'], exp: '「used to + 原形」で「以前は〜していた（習慣・過去の状態）」を表します。' },
+                    { ja: '東京は4月にとっても寒くなることがある。', en: ['Tokyo', 'can', 'be', 'very', 'cold', 'in', 'April.'], exp: '「can」で「〜することがある（一般的な可能性）」を表します。' },
+                    { ja: '私の兄と私は今日買い物に行かなければなりません。', en: ['My', 'brother', 'and', 'I', 'must', 'go', 'shopping', 'today.'], exp: '「must」で義務を表します。' },
+                    { ja: '冷たい水でカップラーメンを作ることができるの？', en: ['Can', 'we', 'make', 'cup', 'ramen', 'with', 'cold', 'water?'], exp: '「Can we ~?」で可能性・能力を尋ねる疑問文です。' },
+                    { ja: '子どもの頃、私は緊急時によくパニックになったものだった。', en: ['As', 'a', 'child,', 'I', 'would', 'often', 'panic', 'in', 'an', 'emergency.'], exp: '「would often + 原形」で「よく〜したものだった（過去の不規則な習慣）」を表します。' },
+                    { ja: 'これで京都の8回目の旅行になるだろうな。', en: ['This', 'would', 'be', 'my', 'eighth', 'trip', 'to', 'Kyoto.'], exp: '「would」で控えめな推測「〜になるだろう」を表します。' },
+                    { ja: 'それは地球温暖化のせいにちがいありません。', en: ['It', 'must', 'be', 'because', 'of', 'global', 'warming.'], exp: '「must be ~」で「〜に違いない」という断定的な推測を表します。' },
+                    { ja: '我が母は一生懸命働いたので疲れているにちがいない。', en: ['My', 'mother', 'must', 'be', 'tired', 'because', 'she', 'worked', 'hard.'], exp: '「must be」で「〜に違いない」を表します。' },
+                    { ja: '我が母は5年前に非常食セットを買っておくべきだった（買ったはずだ）。', en: ['My', 'mother', 'should', 'have', 'bought', 'an', 'emergency', 'food', 'set', '5', 'years', 'ago.'], exp: '「should have + 過去分詞」で「〜しておくべきだった」を表します。' },
+                    { ja: '私たちは今年の夏、スペインに行くかもしれません。', en: ['We', 'may', 'go', 'to', 'Spain', 'this', 'summer.'], exp: '「may」で「〜するかもしれない（控えめな推測）」を表します。' },
+                    { ja: '彼らは道に迷ったにちがいない。', en: ['They', 'must', 'have', 'lost', 'their', 'way.'], exp: '「must have + 過去分詞」で「〜したに違いない（過去の強い推測）」を表します。' },
+                    { ja: '明日、非常食をいくらか買いましょうか。', en: ['Shall', 'we', 'buy', 'some', 'emergency', 'food', 'tomorrow?'], exp: '「Shall we ~?」で「（いっしょに）〜しましょうか」という勧誘・提案を表します。' },
+                    { ja: '被災地で食料を手に入れるのは難しいかもしれません。', en: ['It', 'may', 'be', 'difficult', 'to', 'get', 'food', 'in', 'affected', 'areas.'], exp: '「may be ~」で「〜かもしれない」を表します。' },
+                    { ja: '募金しましょうか。', en: ['Shall', 'we', 'donate?'], exp: '「Shall we ~?」で提案・勧誘を表します。' },
+                    { ja: '私は7時までにそのレストランに到着できるはずです。', en: ['I', 'should', 'be', 'able', 'to', 'get', 'to', 'the', 'restaurant', 'by', 'seven.'], exp: '「should be able to ~」で「〜できるはずだ」という確信の推測を表します。' },
+                    { ja: '今、このアルファ米を食べていいですよ。', en: ['You', 'can', 'eat', 'this', 'alpha', 'rice', 'now.'], exp: '「can」で許可「〜してよい」を表します。' },
+                    { ja: 'あなたがたが避難所で必要とされているものを教えていただけますか。', en: ['Could', 'you', 'tell', 'me', 'what', 'you', 'need', 'in', 'the', 'evacuation', 'shelter?'], exp: '「Could you ~?」で丁寧な依頼を表します。' },
+                    { ja: 'この町では自然災害について考えずにはいられません。', en: ['In', 'this', 'town,', 'we', 'can\'t', 'help', 'thinking', 'about', 'natural', 'disasters.'], exp: '「can\'t help -ing」で「〜せずにはいられない」という慣用表現です。' },
+                    { ja: 'この非常食を試食してくれる？', en: ['Can', 'you', 'try', 'this', 'emergency', 'food?'], exp: '「Can you ~?」で依頼を表します。' },
+                    { ja: '明日の朝、もっと多くの食料と水が届くでしょうか。', en: ['Will', 'more', 'food', 'and', 'water', 'come', 'in', 'tomorrow', 'morning?'], exp: '「Will ~?」で未来の予測・疑問を表します。' },
+                    { ja: '私は家にスマートフォンを忘れてきたかもしれない。', en: ['I', 'could', 'have', 'left', 'my', 'smartphone', 'at', 'home.'], exp: '「could have + 過去分詞」で「〜したかもしれない」という過去の可能性を表します。' },
+                    { ja: '非常食が売り切れる前にもっと早く来るべきだった（来なかった）。', en: ['I', 'should', 'have', 'come', 'earlier', 'before', 'the', 'emergency', 'food', 'sold', 'out.'], exp: '「should have + 過去分詞」で後悔「〜すべきだったのに」を表します。' },
+                    { ja: '緊急の場合には、そのドアは自動的に開くはずです。', en: ['In', 'case', 'of', 'an', 'emergency,', 'the', 'door', 'should', 'open', 'automatically.'], exp: '「should + 原形」で「（当然）〜するはずだ」という予測を表します。' },
+                    { ja: '明日は雨が降るでしょう。', en: ['It', 'will', 'rain', 'tomorrow.'], exp: '「will」で単なる未来の予測を表します。' }
+                ]
+            },
+            {
+                id: 'L11_L12_passive',
+                title: 'Lesson 11-12: 受動態 (Passive Voice)',
+                desc: 'be動詞＋過去分詞（現在・過去・未来・進行形・完了形・群動詞・慣用表現）',
+                icon: 'fa-shield-halved',
+                color: 'from-teal-500 to-emerald-600',
+                questions: [
+                    { ja: 'この本は世界中で読まれています。', en: ['This', 'book', 'is', 'read', 'all', 'over', 'the', 'world.'], exp: '現在の受動態（be + 過去分詞）です。' },
+                    { ja: 'この古い寺は300年前に建てられました。', en: ['This', 'old', 'temple', 'was', 'built', 'three', 'hundred', 'years', 'ago.'], exp: '過去の受動態 (was built) です。' },
+                    { ja: 'その会議は来週開かれる予定です。', en: ['The', 'meeting', 'will', 'be', 'held', 'next', 'week.'], exp: '未来の受動態 (will be held) です。' },
+                    { ja: 'その星は肉眼で見ることができます。', en: ['The', 'star', 'can', 'be', 'seen', 'with', 'the', 'naked', 'eye.'], exp: '助動詞を伴う受動態 (can be seen) です。' },
+                    { ja: '新しいスタジアムが現在建設されているところです。', en: ['A', 'new', 'stadium', 'is', 'being', 'built', 'now.'], exp: '進行形受動態 (is being built) です。' },
+                    { ja: 'そのウェブサイトは最近更新されました。', en: ['This', 'website', 'has', 'been', 'updated', 'recently.'], exp: '完了形受動態 (has been updated) です。' },
+                    { ja: '彼は誕生日に素敵な時計をプレゼントされた。', en: ['He', 'was', 'given', 'a', 'nice', 'watch', 'on', 'his', 'birthday.'], exp: '第4文型の受動態です。' },
+                    { ja: 'その赤ちゃんは祖父にちなんでダイキと名付けられた。', en: ['The', 'baby', 'was', 'named', 'Daiki', 'after', 'his', 'grandfather.'], exp: '第5文型の受動態です。' },
+                    { ja: 'その赤ちゃんは彼女のおばさんによって世話をされた。', en: ['The', 'baby', 'was', 'taken', 'care', 'of', 'by', 'her', 'aunt.'], exp: '群動詞 (take care of) の受動態です。' },
+                    { ja: '富士山はきれいな雪で覆われています。', en: ['Mt.', 'Fuji', 'is', 'covered', 'with', 'beautiful', 'snow.'], exp: '慣用表現「be covered with ~」です。' },
+                    { ja: 'その知らせを聞いて私たちは皆驚いた。', en: ['We', 'were', 'all', 'surprised', 'at', 'the', 'news.'], exp: '慣用表現「be surprised at ~」です。' },
+                    { ja: 'その有名な歌手は若者たちに広く知られています。', en: ['The', 'famous', 'singer', 'is', 'well', 'known', 'to', 'young', 'people.'], exp: '慣用表現「be known to ~」です。' },
+                    { ja: 'この写真はどこで撮影されましたか。', en: ['Where', 'was', 'this', 'photo', 'taken?'], exp: '受動態の疑問文です。' },
+                    { ja: '彼は放課後居残りをさせられた。', en: ['He', 'was', 'made', 'to', 'stay', 'after', 'school.'], exp: '使役動詞の受動態 (be made to V) です。' },
+                    { ja: '英語はオーストラリアで話されていますか。', en: ['Is', 'English', 'spoken', 'in', 'Australia?'], exp: '受動態の Yes/No 疑問文です。' }
                 ]
             },
             {
@@ -712,63 +561,20 @@
                 icon: 'fa-link',
                 color: 'from-sky-500 to-indigo-600',
                 questions: [
-                    {
-                        ja: '私の夢は世界中を旅行することです。',
-                        en: ['My', 'dream', 'is', 'to', 'travel', 'around', 'the', 'world.'],
-                        exp: 'be動詞の補語として to + 動詞の原形 (to travel) を置く【名詞的用法】です。'
-                    },
-                    {
-                        ja: '彼女は新しい洋服を買うために買い物に行った。',
-                        en: ['She', 'went', 'shopping', 'to', 'buy', 'new', 'clothes.'],
-                        exp: '目的「〜するために」を表す不定詞の【副詞的用法】(to buy) です。'
-                    },
-                    {
-                        ja: '私はあなたに伝えるべき重要な知らせがあります。',
-                        en: ['I', 'have', 'important', 'news', 'to', 'tell', 'you.'],
-                        exp: '名詞 (news) を後ろから修飾する不定詞の【形容詞的用法】(to tell) です。'
-                    },
-                    {
-                        ja: '彼は医者になるために一生懸命勉強しています。',
-                        en: ['He', 'studies', 'hard', 'to', 'become', 'a', 'doctor.'],
-                        exp: '目的「〜になるために」を表す不定詞の副詞的用法 (to become) です。'
-                    },
-                    {
-                        ja: '鍵をかけるのを忘れないでね。',
-                        en: ['Remember', 'to', 'lock', 'the', 'door.'],
-                        exp: 'remember + to V で「（これから）〜することを覚えている／忘れない」です。'
-                    },
-                    {
-                        ja: 'その問題は自力で解くには難しすぎる。',
-                        en: ['The', 'problem', 'is', 'too', 'difficult', 'to', 'solve', 'alone.'],
-                        exp: 'too + 形容詞 + to V で「〜すぎてVできない」を表す構文です。'
-                    },
-                    {
-                        ja: '私は何か冷たい飲み物が欲しい。',
-                        en: ['I', 'want', 'something', 'cold', 'to', 'drink.'],
-                        exp: 'something + 形容詞 (cold) + to V (drink) の語順になります。'
-                    },
-                    {
-                        ja: '彼は親切にも私を手伝ってくれた。',
-                        en: ['He', 'was', 'kind', 'enough', 'to', 'help', 'me.'],
-                        exp: '形容詞 + enough to V で「Vするほど〜だ / 親切にもVしてくれた」の意味になります。'
-                    },
-                    {
-                        ja: 'どこへ行けばいいか教えてください。',
-                        en: ['Please', 'tell', 'me', 'where', 'to', 'go.'],
-                        exp: '疑問詞 + to V (where to go) で「どこへ行くべきか」という名詞節相当の役割をします。'
-                    },
-                    {
-                        ja: '母は私に部屋を掃除するように言った。',
-                        en: ['My', 'mother', 'told', 'me', 'to', 'clean', 'my', 'room.'],
-                        exp: 'tell + O + to V で「Oに〜するよう言う」という重要な第5文型目的語・不定詞構文です。'
-                    }
+                    { ja: '私の夢は世界中を旅行することです。', en: ['My', 'dream', 'is', 'to', 'travel', 'around', 'the', 'world.'], exp: '不定詞の【名詞的用法】(to travel) です。' },
+                    { ja: '彼女は新しい洋服を買うために買い物に行った。', en: ['She', 'went', 'shopping', 'to', 'buy', 'new', 'clothes.'], exp: '目的を表す【副詞的用法】(to buy) です。' },
+                    { ja: '私はあなたに伝えるべき重要な知らせがあります。', en: ['I', 'have', 'important', 'news', 'to', 'tell', 'you.'], exp: '修飾する【形容詞的用法】(to tell) です。' },
+                    { ja: '彼は医者になるために一生懸命勉強しています。', en: ['He', 'studies', 'hard', 'to', 'become', 'a', 'doctor.'], exp: '目的を表す副詞的用法 (to become) です。' },
+                    { ja: '鍵をかけるのを忘れないでね。', en: ['Remember', 'to', 'lock', 'the', 'door.'], exp: 'remember + to V で「〜することを覚えている」です。' },
+                    { ja: 'その問題は自力で解くには難しすぎる。', en: ['The', 'problem', 'is', 'too', 'difficult', 'to', 'solve', 'alone.'], exp: 'too ... to V で「〜すぎてVできない」です。' },
+                    { ja: '私は何か冷たい飲み物が欲しい。', en: ['I', 'want', 'something', 'cold', 'to', 'drink.'], exp: 'something + 形容詞 + to V の語順です。' },
+                    { ja: '彼は親切にも私を手伝ってくれた。', en: ['He', 'was', 'kind', 'enough', 'to', 'help', 'me.'], exp: '形容詞 + enough to V の構文です。' },
+                    { ja: 'どこへ行けばいいか教えてください。', en: ['Please', 'tell', 'me', 'where', 'to', 'go.'], exp: '疑問詞 + to V (where to go) です。' },
+                    { ja: '母は私に部屋を掃除するように言った。', en: ['My', 'mother', 'told', 'me', 'to', 'clean', 'my', 'room.'], exp: 'tell + O + to V で「Oに〜するよう言う」構文です。' }
                 ]
             }
         ];
 
-        /* ----------------------------------------------------
-         * STATE MANAGEMENT
-         * ---------------------------------------------------- */
         let state = {
             currentUnit: null,
             questions: [],
@@ -781,9 +587,6 @@
             clearedUnitsCount: 0
         };
 
-        /* ----------------------------------------------------
-         * AUDIO / TTS SYNTHESIS
-         * ---------------------------------------------------- */
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function playSound(type) {
@@ -851,9 +654,6 @@
             }
         }
 
-        /* ----------------------------------------------------
-         * APP FLOW & SCREEN NAVIGATION
-         * ---------------------------------------------------- */
         window.addEventListener('DOMContentLoaded', () => {
             renderUnitList();
             loadStats();
@@ -900,9 +700,6 @@
             });
         }
 
-        /* ----------------------------------------------------
-         * QUIZ LOGIC
-         * ---------------------------------------------------- */
         function startQuiz(unitId) {
             const unit = GRAMMAR_UNITS.find(u => u.id === unitId);
             if (!unit) return;
@@ -1002,9 +799,6 @@
             renderWords();
         }
 
-        /* ----------------------------------------------------
-         * ANSWER VERIFICATION
-         * ---------------------------------------------------- */
         function checkAnswer() {
             const q = state.questions[state.currentIndex];
             const userWords = state.selectedWords.map(w => w.text);
@@ -1078,9 +872,6 @@
             }
         }
 
-        /* ----------------------------------------------------
-         * RESULTS & REVIEW SCREEN
-         * ---------------------------------------------------- */
         function finishQuiz() {
             document.getElementById('quiz-screen').classList.add('hidden');
             document.getElementById('quiz-screen').classList.remove('flex');

@@ -3,947 +3,461 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grammar Master - 英文法並べ替え学習</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>Grammar Master - Back Translation App</title>
     <style>
+        :root {
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --accent-green: #10b981;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: 'Noto Sans JP', sans-serif;
-            background-color: #f0f4f8;
-            user-select: none;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
-        .font-fredoka {
-            font-family: 'Fredoka', cursive;
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            padding: 32px;
+            border: 1px solid var(--border-color);
         }
-        .word-chip {
-            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-            touch-action: manipulation;
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
         }
-        .word-chip:active {
-            transform: scale(0.95);
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.025em;
         }
-        .bounce-short {
-            animation: bounce 0.4s ease infinite alternate;
+
+        .selector-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
         }
-        @keyframes bounce {
-            from { transform: translateY(0); }
-            to { transform: translateY(-6px); }
+
+        label {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
         }
-        .pop-in {
-            animation: popIn 0.25s ease-out forwards;
+
+        select {
+            padding: 8px 16px;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: #fff;
+            color: var(--text-main);
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
         }
-        @keyframes popIn {
-            0% { opacity: 0; transform: scale(0.8); }
-            100% { opacity: 1; transform: scale(1); }
+
+        select:focus {
+            border-color: var(--primary-color);
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 28px;
+            background-color: #ffffff;
+            margin-bottom: 24px;
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .badge {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            background-color: #eff6ff;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .q-number {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .japanese-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            line-height: 1.6;
+            color: var(--text-main);
+            margin-bottom: 20px;
+        }
+
+        .answer-box {
+            display: none;
+            background-color: #f0fdf4;
+            border-left: 4px solid var(--accent-green);
+            padding: 16px;
+            border-radius: 6px;
+            margin-top: 16px;
+        }
+
+        .answer-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--accent-green);
+            margin-bottom: 4px;
+        }
+
+        .english-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #166534;
+            line-height: 1.5;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        .btn-outline:hover {
+            background-color: #f1f5f9;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle-container {
+            text-align: center;
+            margin-top: 10px;
         }
     </style>
 </head>
-<body class="min-h-screen text-slate-800 flex flex-col justify-between">
+<body>
 
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center gap-2 cursor-pointer" onclick="showUnitSelection()">
-                <div class="bg-indigo-600 text-white p-2 rounded-xl flex items-center justify-center w-10 h-10 shadow-md">
-                    <i class="fa-solid fa-graduation-cap text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="font-fredoka font-bold text-xl text-indigo-900 leading-none">GrammarMaster</h1>
-                    <p class="text-xs text-slate-500 font-medium">教科書準拠 英文法並べ替え</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-3">
-                <button id="sound-toggle" onclick="toggleSound()" class="p-2.5 rounded-full hover:bg-slate-100 text-slate-600 transition" title="効果音のON/OFF">
-                    <i class="fa-solid fa-volume-high text-lg" id="sound-icon"></i>
-                </button>
-                <div id="overall-stats" class="hidden sm:flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1.5 rounded-full border border-amber-200 text-xs font-bold">
-                    <i class="fa-solid fa-trophy text-amber-500"></i>
-                    <span>総クリア: <span id="total-cleared">0</span></span>
-                </div>
-            </div>
-        </div>
+<div class="container">
+    <header>
+        <h1>Grammar Master</h1>
     </header>
 
-    <main class="max-w-3xl w-full mx-auto p-4 flex-grow flex flex-col justify-center">
+    <div class="selector-box">
+        <label for="lessonSelect">対象ユニット:</label>
+        <select id="lessonSelect" onchange="changeLesson()">
+            <option value="L11_12">Lesson 11-12（全49問 Complete 🎉）</option>
+            <option value="L13_15">Lesson 13-15（全75問 Complete 🎉）</option>
+        </select>
+    </div>
 
-        <!-- 1. UNIT SELECTION SCREEN -->
-        <section id="unit-select-screen" class="space-y-6 py-4">
-            <div class="text-center space-y-2">
-                <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Lessons</span>
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800">学習する単元を選んでね</h2>
-                <p class="text-slate-500 text-sm">プリントの問題からランダムに10問が出題されるよ！</p>
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="card">
+        <div>
+            <div class="card-header">
+                <span class="badge" id="lessonBadge">Lesson 11-12</span>
+                <span class="q-number" id="qNumber">Question 1 / 49</span>
             </div>
+            <div class="japanese-text" id="jaText">読み込み中...</div>
+        </div>
 
-            <!-- Unit List Grid -->
-            <div id="unit-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <!-- Units dynamically inserted via JS -->
-            </div>
-        </section>
+        <div class="toggle-container">
+            <button class="btn btn-outline" id="toggleBtn" onclick="toggleAnswer()">解答を表示</button>
+        </div>
 
-        <!-- 2. QUIZ SCREEN -->
-        <section id="quiz-screen" class="hidden flex-col gap-6 py-2">
-            <!-- Progress & Stats Bar -->
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-                <div class="flex justify-between items-center text-sm font-bold text-slate-600">
-                    <span class="flex items-center gap-2">
-                        <button onclick="showUnitSelection()" class="text-slate-400 hover:text-slate-600 mr-1">
-                            <i class="fa-solid fa-arrow-left"></i>
-                        </button>
-                        <span id="quiz-unit-title" class="text-indigo-600">単元名</span>
-                    </span>
-                    <span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs">
-                        問題 <span id="current-q-num">1</span> / 10
-                    </span>
-                </div>
-                <!-- Progress Bar -->
-                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
-                    <div id="progress-bar" class="bg-indigo-600 h-full transition-all duration-300 ease-out" style="width: 10%;"></div>
-                </div>
-            </div>
-
-            <!-- Question Card -->
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 text-center space-y-3 relative overflow-hidden">
-                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Japanese Sentence</div>
-                <h3 id="japanese-text" class="text-lg sm:text-xl font-bold text-slate-800 leading-relaxed">
-                    ここに日本語の出題文が入ります。
-                </h3>
-            </div>
-
-            <!-- Answer Drop Area (Selected Words) -->
-            <div class="space-y-2">
-                <div class="flex justify-between items-center px-2">
-                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Your Answer</span>
-                    <button onclick="clearAnswer()" class="text-xs text-slate-400 hover:text-rose-500 font-medium flex items-center gap-1 transition">
-                        <i class="fa-solid fa-rotate-left"></i> リセット
-                    </button>
-                </div>
-                <div id="answer-zone" class="min-h-[110px] bg-indigo-50/60 border-2 border-dashed border-indigo-200 rounded-2xl p-3 flex flex-wrap gap-2 items-center justify-start transition-all">
-                    <!-- Selected word chips go here -->
-                </div>
-            </div>
-
-            <!-- Word Pool Area (Available Words) -->
-            <div class="space-y-2">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider px-2">Word Options</span>
-                <div id="word-pool" class="min-h-[100px] bg-white border border-slate-200 rounded-2xl p-4 flex flex-wrap gap-2.5 items-center justify-center shadow-inner">
-                    <!-- Available word chips go here -->
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="pt-2">
-                <button id="check-btn" onclick="checkAnswer()" disabled class="w-full py-4 bg-indigo-600 disabled:bg-slate-300 disabled:cursor-not-allowed hover:bg-indigo-700 text-white font-bold text-lg rounded-2xl shadow-lg hover:shadow-xl transition transform active:scale-[0.99] flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-paper-plane"></i> 答えあわせをする
-                </button>
-            </div>
-        </section>
-
-        <!-- 3. RESULT SCREEN -->
-        <section id="result-screen" class="hidden py-6 space-y-6">
-            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 text-center space-y-6">
-                <div class="inline-block p-4 bg-amber-100 text-amber-500 rounded-full bounce-short">
-                    <i class="fa-solid fa-trophy text-4xl"></i>
-                </div>
-                
-                <div>
-                    <h2 class="text-2xl font-black text-slate-800">セット完了！お疲れ様でした！</h2>
-                    <p class="text-slate-500 text-sm mt-1" id="result-unit-title">単元名</p>
-                </div>
-
-                <!-- Score Display -->
-                <div class="bg-indigo-50 p-6 rounded-2xl max-w-sm mx-auto space-y-2">
-                    <div class="text-xs font-bold text-indigo-400 uppercase">SCORE</div>
-                    <div class="text-5xl font-black text-indigo-600 font-fredoka">
-                        <span id="final-score">0</span> / 10
-                    </div>
-                    <div id="star-rating" class="text-amber-400 text-xl space-x-1 pt-1">
-                        <!-- Stars generated dynamically -->
-                    </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-                    <button onclick="retryCurrentUnit()" class="py-3 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-rotate-right"></i> もう一度挑戦する（別問題）
-                    </button>
-                    <button onclick="showUnitSelection()" class="py-3 px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-list"></i> 単元一覧に戻る
-                    </button>
-                </div>
-            </div>
-
-            <!-- Review Breakdown -->
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 space-y-4">
-                <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-clipboard-check text-indigo-600"></i> 今回の問題と復習
-                </h3>
-                <div id="review-list" class="space-y-4">
-                    <!-- Review items dynamically generated -->
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Answer Feedback Modal -->
-    <div id="feedback-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
-        <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 space-y-5 shadow-2xl pop-in max-h-[90vh] overflow-y-auto">
-            
-            <!-- Result Badge -->
-            <div id="modal-badge-container" class="flex items-center gap-3">
-                <div id="modal-icon" class="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow">
-                    <!-- Icon dynamically inserted -->
-                </div>
-                <div>
-                    <h3 id="modal-title" class="text-2xl font-black">正解！</h3>
-                    <p id="modal-subtitle" class="text-xs text-slate-500">すばらしい！正しく並べ替えられました。</p>
-                </div>
-            </div>
-
-            <!-- User vs Model Answer Comparison -->
-            <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-sm">
-                <!-- User Answer (Show if incorrect) -->
-                <div id="user-ans-box" class="hidden space-y-1">
-                    <span class="text-xs font-bold text-rose-500 uppercase">あなたの回答:</span>
-                    <p id="modal-user-ans" class="text-slate-700 font-medium line-through decoration-rose-400"></p>
-                </div>
-
-                <!-- Model Answer -->
-                <div class="space-y-1">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-emerald-600 uppercase">模範解答:</span>
-                        <button onclick="speakModelAnswer()" class="text-xs bg-emerald-100 hover:bg-emerald-200 text-emerald-700 font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 transition">
-                            <i class="fa-solid fa-volume-high"></i> 発音を聞く
-                        </button>
-                    </div>
-                    <p id="modal-model-ans" class="text-base sm:text-lg font-bold text-slate-800 leading-snug"></p>
-                </div>
-            </div>
-
-            <!-- Explanation Box -->
-            <div class="bg-indigo-50/70 border border-indigo-100 p-4 rounded-2xl space-y-1.5 text-sm">
-                <div class="font-bold text-indigo-900 flex items-center gap-1.5">
-                    <i class="fa-solid fa-circle-info text-indigo-500"></i> 解説・ポイント
-                </div>
-                <p id="modal-explanation" class="text-slate-700 leading-relaxed text-xs sm:text-sm">
-                    解説文がここに入ります。
-                </p>
-            </div>
-
-            <!-- Next Question Button -->
-            <button onclick="nextQuestion()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base rounded-2xl shadow-md transition flex items-center justify-center gap-2">
-                <span>次の問題へ</span> <i class="fa-solid fa-arrow-right"></i>
-            </button>
-
+        <div class="answer-box" id="answerBox">
+            <div class="answer-label">English Answer</div>
+            <div class="english-text" id="enText"></div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400">
-        <p>&copy; GrammarMaster - 教科書準拠 英文法学習アプリ</p>
-        
-        <!-- Visitor Counter -->
-        <div class="mt-2.5 flex justify-center items-center">
-            <div class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-full border border-indigo-200 text-xs font-bold shadow-sm">
-                <i class="fa-solid fa-users text-indigo-500"></i>
-                <span>累計訪問者数: <span id="visitor-count">1</span> 人</span>
-            </div>
-        </div>
-    </footer>
+    <div class="controls">
+        <button class="btn btn-outline" id="prevBtn" onclick="prevQuestion()">← 前へ</button>
+        <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">次へ →</button>
+    </div>
+</div>
 
-    <script>
-        async function updateVisitorCount() {
-            const namespace = "mattun-tom-grammar-master"; 
-            const key = "visits";
+<script>
+const dataset = {
+    L11_12: [
+        { id: 1, ja: "その国の人々には十分な水がないと言われています。", en: "It is said that people in that country don’t have enough water." },
+        { id: 2, ja: "パンは小麦から作られる。", en: "Bread is made from wheat." },
+        { id: 3, ja: "すべての生徒たちが水問題を教わります。", en: "All the students are taught water problems." },
+        { id: 4, ja: "水問題はすべての生徒に教えられます。", en: "Water problems are taught to all the students." },
+        { id: 5, ja: "たくさんの水を与えてくれる農家の人によって，牛は世話をされています。", en: "Cattle are taken care of by farmers who provide plenty of water." },
+        { id: 6, ja: "全ての生徒は田中先生から国語を教わっている。", en: "All the students are taught Japanese by Ms. Tanaka." },
+        { id: 7, ja: "国語は田中先生によって全ての生徒に教えられている。", en: "Japanese is taught to all the students by Ms. Tanaka." },
+        { id: 8, ja: "私の自転車は兄によって修理されました。", en: "My bicycle was repaired by my brother." },
+        { id: 9, ja: "私の兄は自分の部屋を掃除するように言われました。", en: "My brother was told to clean his room." },
+        { id: 10, ja: "私の母は先週，私に新しい自転車を買ってくれました。", en: "My mother bought me a new bicycle last week." },
+        { id: 11, ja: "その赤ちゃんはみんなから愛されています。", en: "The baby is loved by everyone." },
+        { id: 12, ja: "その歌は多くの人々に知られています。", en: "The song is known to many people." },
+        { id: 13, ja: "その窓は昨日彼によって壊されました。", en: "The window was broken by him yesterday." },
+        { id: 14, ja: "この本は世界中で読まれています。", en: "This book is read all over the world." },
+        { id: 15, ja: "その部屋は毎日彼女によって清掃されます。", en: "The room is cleaned by her every day." },
+        { id: 16, ja: "彼は友達に「トム」と呼ばれています。", en: "He is called Tom by his friends." },
+        { id: 17, ja: "この写真は私の父によって撮影されました。", en: "This picture was taken by my father." },
+        { id: 18, ja: "その手紙は英語で書かれていました。", en: "The letter was written in English." },
+        { id: 19, ja: "その事故で誰も怪我をしませんでした。", en: "Nobody was injured in the accident." },
+        { id: 20, ja: "その会議は来週開かれます。", en: "The meeting will be held next week." },
+        { id: 21, ja: "その犬は子供たちに可愛がられています。", en: "The dog is loved by the children." },
+        { id: 22, ja: "この建物は50年前に建てられました。", en: "This building was built 50 years ago." },
+        { id: 23, ja: "私達は先生に静かにするよう言われました。", en: "We were told to be quiet by our teacher." },
+        { id: 24, ja: "彼女はパーティーに招待されました。", en: "She was invited to the party." },
+        { id: 25, ja: "その問題はすぐに解決されるでしょう。", en: "The problem will be solved soon." },
+        { id: 26, ja: "富士山は日本最高峰として知られている。", en: "Mt. Fuji is known as the highest mountain in Japan." },
+        { id: 27, ja: "私はそのニュースを聞いて驚きました。", en: "I was surprised to hear the news." },
+        { id: 28, ja: "そのお寺は多くの観光客に訪れられます。", en: "The temple is visited by many tourists." },
+        { id: 29, ja: "車は定期的に点検されるべきです。", en: "Cars should be checked regularly." },
+        { id: 30, ja: "この部屋でタバコを吸ってはいけません。", en: "Smoking is not allowed in this room." },
+        { id: 31, ja: "その仕事はすでに完了しました。", en: "The work has already been completed." },
+        { id: 32, ja: "そのプロジェクトは現在進行中です。", en: "The project is currently being processed." },
+        { id: 33, ja: "彼はみんなに尊敬されています。", en: "He is respected by everyone." },
+        { id: 34, ja: "新しい図書館が建設中です。", en: "A new library is being built." },
+        { id: 35, ja: "この言語は南米で話されています。", en: "This language is spoken in South America." },
+        { id: 36, ja: "その事実は全員に知れ渡った。", en: "The fact became known to all." },
+        { id: 37, ja: "私は昨日雨に降られました。", en: "I was caught in the rain yesterday." },
+        { id: 38, ja: "その知らせはすぐに広まった。", en: "The news was spread quickly." },
+        { id: 39, ja: "彼の作品は高く評価されている。", en: "His work is highly evaluated." },
+        { id: 40, ja: "危険な行為は禁止されています。", en: "Dangerous actions are prohibited." },
+        { id: 41, ja: "その機械は安全に操作される必要があります。", en: "The machine needs to be operated safely." },
+        { id: 42, ja: "このルールは全員に適用されます。", en: "This rule is applied to everyone." },
+        { id: 43, ja: "そのイベントは悪天候のため延期されました。", en: "The event was postponed due to bad weather." },
+        { id: 44, ja: "彼はその罪で逮捕された。", en: "He was arrested for the crime." },
+        { id: 45, ja: "その荷物は明日届く予定です。", en: "The package is expected to arrive tomorrow." },
+        { id: 46, ja: "多くの木々が台風で倒された。", en: "Many trees were blown down by the typhoon." },
+        { id: 47, ja: "環境保護の重要性が指摘されている。", en: "The importance of environmental protection is pointed out." },
+        { id: 48, ja: "水が無駄使いされているのを見てがっかりしました。", en: "I was disappointed to see the waste of water." },
+        { id: 49, ja: "大量の水は簡単に輸送することができる。", en: "A lot of water can be transported easily." }
+    ],
+    L13_15: [
+        { id: 1, ja: "私は妹に電話をかけ直させます。", en: "I'll have my sister call you back" },
+        { id: 2, ja: "両親はいつも，私にもっと一生懸命勉強をしなさいと言います。", en: "My parents always tell me to study harder" },
+        { id: 3, ja: "そのフードバンクはそれらを受け入れてくれるようだ。", en: "The food bank seems to accept them" },
+        { id: 4, ja: "その投稿のおかげで，私は食べ物に困っている人を助けようと決めました。", en: "The post made me decide to support people in need of food" },
+        { id: 5, ja: "この食べ物はフードバンクに送られる価値があります。", en: "This food deserves to be sent to the food bank" },
+        { id: 6, ja: "父は先週その調理済みの食品を同僚からもらったみたいです。", en: "My father seems to have got[received] the pre-cooked food from his colleague" },
+        { id: 7, ja: "新しい友だちを作ることはそれほど簡単ではありません。", en: "To make new friends is not so easy" },
+        { id: 8, ja: "私がコンサートに行かせないから，娘は不満です。", en: "My daughter's unhappy because I don't let her go to concerts" },
+        { id: 9, ja: "この食べ物が受け入れられるかどうかスタッフにチェックしてもらいます。", en: "I'll have the staff check whether this food is acceptable or not" },
+        { id: 10, ja: "そんなに高い車を買うなんて，彼女はお金持ちにちがいない。", en: "She must be rich to buy such an expensive car" },
+        { id: 11, ja: "そのフードバンクが必要としているものを，間違えないように気をつけないといけないね。", en: "We have to be careful not to make a mistake about what the food bank needs" },
+        { id: 12, ja: "私は日本における食糧問題を解決するための団体を知っています。", en: "I know an organization to solve food problems in Japan" },
+        { id: 13, ja: "友だちに野菜を持ち帰ってくれるよう頼みました。", en: "I asked my friend(s) to take some vegetables home" },
+        { id: 14, ja: "私は手品師が帽子からウサギを取り出すのを見た。", en: "I saw the magician take a rabbit from a[his/her] hat" },
+        { id: 15, ja: "レポートを書くために一生懸命勉強しました。", en: "I studied hard to write a report" },
+        { id: 16, ja: "冷蔵庫の中にはたくさんの食料を保管する十分な場所がないんだ。", en: "There isn't enough space to keep a lot of food in the fridge" },
+        { id: 17, ja: "それらの食材をすべて使うのは難しいとわかりました。", en: "I found it difficult to use all of those ingredients" },
+        { id: 18, ja: "保冷剤をくれるなんて，君はやさしいね。", en: "You are kind to give me the ice pack" },
+        { id: 19, ja: "添え状を準備したいのですが，書くものを何も持っていません。", en: "I want to prepare a cover letter, but I have nothing to write with" },
+        { id: 20, ja: "デジタルテクノロジーにそんなに頼らないようにしようよ。", en: "Let's try not to depend[rely] so much on digital technology" },
+        { id: 21, ja: "私にはやるべき宿題がたくさんある。", en: "I have a lot of homework to do" },
+        { id: 22, ja: "私は何か温かい飲み物が欲しい。", en: "I want something warm to drink" },
+        { id: 23, ja: "私は読むための本を探している。", en: "I'm looking for a book to read" },
+        { id: 24, ja: "彼は言いたいことを何も言わなかった。", en: "He said nothing to say" },
+        { id: 25, ja: "私には一緒に行く友達がいない。", en: "I have no friends to go with" },
+        { id: 26, ja: "彼女は朝早く起きて始発列車に乗った。", en: "She got up early to catch the first train" },
+        { id: 27, ja: "私はあなたに会えてとても嬉しいです。", en: "I'm very glad to see you" },
+        { id: 28, ja: "彼は試験に合格するために必死で勉強した。", en: "He studied hard to pass the exam" },
+        { id: 29, ja: "私は何か食べるものを買うために店に行った。", en: "I went to the store to buy something to eat" },
+        { id: 30, ja: "彼女は成長して有名な歌手になった。", en: "She grew up to be a famous singer" },
+        { id: 31, ja: "多くの日本人は外国へ旅行するとき英語を話す努力をしないと言われてきた。", en: "It has been said that many Japanese people traveling abroad don't make an effort to speak English" },
+        { id: 32, ja: "あなたの通訳が必要な場合があります。", en: "In some cases, your translation is required" },
+        { id: 33, ja: "私は通訳の仕事を希望している。", en: "I would like to work as an interpreter" },
+        { id: 34, ja: "誰もが英語を話すようになるにはかなりの時間を必要とするでしょう。", en: "It will take a long time for everyone to become able to speak English" },
+        { id: 35, ja: "このコンピューターのバッテリーの寿命は非常に短いです。", en: "The battery life of this computer is very short" },
+        { id: 36, ja: "私の英語が通じて安心しました。", en: "I was relieved to make myself understood in English" },
+        { id: 37, ja: "誰かが私を呼ぶのが聞こえます。", en: "I hear someone calling my name" },
+        { id: 38, ja: "誰かが私を呼ぶのが聞こえた。", en: "I heard someone calling my name" },
+        { id: 39, ja: "私は誰かが私の名前を呼ぶのを聞いた。", en: "I heard someone call my name" },
+        { id: 40, ja: "泣いている赤ちゃんをあやすのは難しい。", en: "It's difficult to soothe a crying baby" },
+        { id: 41, ja: "私は妹が部屋で泣いているのを聞いた。", en: "I heard my sister crying in her room" },
+        { id: 42, ja: "私の妹は理由もなく泣く時がある。", en: "Sometimes my sister cries for no reason" },
+        { id: 43, ja: "誰も何も言わなかったのは驚きだ。", en: "It is surprising that no one said anything" },
+        { id: 44, ja: "私は妹に怒られたく無いので急いだ。", en: "I hurried because I didn't want my sister to scold me" },
+        { id: 45, ja: "赤ちゃんが泣いている理由のほとんどは腹が減っているからだ。", en: "Most of the time a baby cries, it's because they're hungry" },
+        { id: 46, ja: "テープレコーダーを使って外国語の能力を伸ばすことが出来る。", en: "You can improve your foreign language skills by using a tape recorder" },
+        { id: 47, ja: "その問題は難しくなってより手強い。", en: "That problem became difficult and more challenging" },
+        { id: 48, ja: "私は疲れすぎて立つことができない。", en: "I'm too tired to stand up" },
+        { id: 49, ja: "私は絶対に不可算名詞に「a」を付けない。", en: "I never put \"a\" in front of uncountable nouns" },
+        { id: 50, ja: "電車に乗ったら私は立ちっぱなしではありません。", en: "When I get on the train, I don't remain standing" },
+        { id: 51, ja: "写真は写してもよろしいですか。", en: "May I take a picture?" },
+        { id: 52, ja: "答は合っています。", en: "The answer is correct." },
+        { id: 53, ja: "私はレンズを指で触ってしまいました。", en: "I touched the lens with my finger" },
+        { id: 54, ja: "私は12年間英語を練習しつづけています。", en: "I have been practicing English for 12 years" },
+        { id: 55, ja: "ライブテープを頼んで作ってもらいました。", en: "I had a custom tape made for me" },
+        { id: 56, ja: "私のカメラの故障箇所はこれを書いてショップのスタッフに渡せば通じますか。", en: "If I write this down and hand it to the shop staff, will they understand what's wrong with my camera?" },
+        { id: 57, ja: "誤解が無いように筆談をして下さい。", en: "Please write it down so there's no misunderstanding" },
+        { id: 58, ja: "私はあなたの名前を日本の著名なミュージシャンのリストで見かけたことがあります。", en: "I have seen your name on a list of famous Japanese musicians" },
+        { id: 59, ja: "手伝いが必要でしたら言ってください。", en: "Let me know if you need any help" },
+        { id: 60, ja: "今の会話をもう一度録音しても良いですか。", en: "Can I record our conversation again?" },
+        { id: 61, ja: "私は英文法について何も理解できません。", en: "I don't understand anything about English grammar" },
+        { id: 62, ja: "レコーダーの調子を悪くした事を彼らに伝えてもらえますか。", en: "Could you tell them that my recorder is malfunctioning?" },
+        { id: 63, ja: "アレルギーに対してどんな処置をするべきですか。", en: "What measures should be taken for allergies?" },
+        { id: 64, ja: "このペンはあまり書き心地が良くない。", en: "This pen is not very comfortable to write with" },
+        { id: 65, ja: "その事件は急に起きたことだった。", en: "The incident happened suddenly" },
+        { id: 66, ja: "そのフードバンクは日本からの食料を受け入れる予定です。", en: "The food bank is to accept food from Japan" },
+        { id: 67, ja: "私の目標はガンの治療法を見つけることです。", en: "My goal is to find a cure for cancer" },
+        { id: 68, ja: "私にとって夕食を作るのは簡単なことではありません。", en: "It's not easy for me to cook[make] dinner" },
+        { id: 69, ja: "ルーシーは体調が悪かったみたいですね。", en: "Lucy seems to have been sick" },
+        { id: 70, ja: "私は友だちとテレビゲームをするのが好きです。", en: "I like to play video games with my friends" },
+        { id: 71, ja: "私はメアリーが通りを渡るのを見た。", en: "I saw Mary cross the street" },
+        { id: 72, ja: "子どもの世話をすることは楽しいと思いました。", en: "I found it enjoyable to take care of children" },
+        { id: 73, ja: "新しい友だちを作ることはそれほど簡単ではありません。", en: "It's not so easy to make new friends" },
+        { id: 74, ja: "両親は私のよい成績を聞いて大喜びした。", en: "My parents were delighted to hear about my excellent grades" },
+        { id: 75, ja: "食品廃棄について考えることがこれからの課題です。", en: "To think about food waste is a challenge for the future" }
+    ]
+};
 
-            try {
-                const response = await fetch(`https://api.counterapi.dev/v1/${namespace}/${key}/up`);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
-                const data = await response.json();
-                
-                if (data && data.count !== undefined) {
-                    document.getElementById('visitor-count').innerText = data.count.toLocaleString();
-                    return;
-                }
-            } catch (error) {
-                console.warn('API読み込み失敗: ローカルカウントを表示します', error);
-            }
+let currentKey = 'L11_12';
+let currentIndex = 0;
 
-            let localCount = parseInt(localStorage.getItem('gm_local_visitor_count') || '0', 10);
-            localCount += 1;
-            localStorage.setItem('gm_local_visitor_count', localCount);
-            
-            document.getElementById('visitor-count').innerText = localCount.toLocaleString();
-        }
+function updateCard() {
+    const list = dataset[currentKey];
+    const item = list[currentIndex];
 
-        const GRAMMAR_UNITS = [
-            {
-                id: 'L1_verbs_questions',
-                title: 'Lesson 1: 動詞／否定文・疑問文',
-                desc: 'be動詞・一般動詞・疑問詞(How/What/Where/When/Which)を用いた基本構文',
-                icon: 'fa-comments',
-                color: 'from-blue-500 to-cyan-600',
-                questions: [
-                    { ja: 'あなたはどれくらいの頻度で外食しますか。', en: ['How', 'often', 'do', 'you', 'eat', 'out?'], exp: '頻度を尋ねる疑問詞「How often」に続く一般動詞の疑問文（do + S + V）です。' },
-                    { ja: '私たちの担任は優しいです。', en: ['Our', 'homeroom', 'teacher', 'is', 'kind.'], exp: '主語「Our homeroom teacher」に応じた be動詞 is を使用したSVC文型です。' },
-                    { ja: 'あなたはどの学校行事が好きですか。', en: ['Which', 'school', 'event', 'do', 'you', 'like?'], exp: '選択を求める疑問詞「Which + 名詞」の疑問文です。' },
-                    { ja: '彼は幸せではない。', en: ['He', 'isn\'t', 'happy.'], exp: 'be動詞の否定文（is + not / isn\'t）の基本構造です。' },
-                    { ja: '私たちにはどれくらいの（量の）宿題がありますか。', en: ['How', 'much', 'homework', 'do', 'we', 'have?'], exp: '数えられない名詞（homework）の量を尋ねる「How much + 不可算名詞」の疑問文です。' },
-                    { ja: '母はオンラインショッピングのためにインターネットを使います。', en: ['My', 'mother', 'uses', 'the', 'internet', 'for', 'online', 'shopping.'], exp: '三人称単数現在の主語（My mother）に合わせて動詞に s（uses）をつけます。' },
-                    { ja: '昨日の夜、あなたは何をしましたか。', en: ['What', 'did', 'you', 'do', 'last', 'night?'], exp: '過去の動作を尋ねる「What + did + S + 動詞の原形 ?」の疑問文です。' },
-                    { ja: '私は犬が好きです。', en: ['I', 'like', 'dogs.'], exp: '一般的に「犬」全般を表す場合は複数形の dogs を用います。' },
-                    { ja: 'ケンはどのような種類の料理を食べましたか。', en: ['What', 'kind', 'of', 'dishes', 'did', 'Ken', 'eat?'], exp: '「What kind of + 複数名詞」で「どのような種類の〜」を表す過去形の疑問文です。' },
-                    { ja: 'あなたはどこに住んでいますか。', en: ['Where', 'do', 'you', 'live?'], exp: '場所を尋ねる疑問詞 Where を用いた一般動詞の疑問文です。' },
-                    { ja: '明日の試験について緊張しています。', en: ['I\'m', 'nervous', 'about', 'the', 'exam', 'tomorrow.'], exp: '「be nervous about ~」で「〜について緊張している」を表します。' },
-                    { ja: 'あなたはいつ宿題をしますか。', en: ['When', 'do', 'you', 'do', 'your', 'homework?'], exp: '時を尋ねる When に続く「do your homework」の疑問文です。' },
-                    { ja: '私たちは幸せです。', en: ['We', 'are', 'happy.'], exp: '1人称複数 We に応じた be動詞 are です。' },
-                    { ja: 'あなたは犬が好きですか。', en: ['Do', 'you', 'like', 'dogs?'], exp: '一般動詞の疑問文（Do + S + 動詞の原形 ?）です。' },
-                    { ja: '今晩何か予定ある？', en: ['Do', 'you', 'have', 'any', 'plans', 'for', 'this', 'evening?'], exp: '疑問文における「いくつかの〜」は any を使用します。' },
-                    { ja: '私はその部活のメンバーではありません。', en: ['I\'m', 'not', 'a', 'member', 'of', 'the', 'club.'], exp: '「Aのメンバー」は「a member of A」で表現します。' },
-                    { ja: 'あなたのお兄さんは何歳ですか。', en: ['How', 'old', 'is', 'your', 'brother?'], exp: '年齢を尋ねる疑問詞「How old + be動詞 + 主語 ?」です。' },
-                    { ja: 'あなたはいくつの言語を話せますか。', en: ['How', 'many', 'languages', 'can', 'you', 'speak?'], exp: '数えられる名詞の数を尋ねる「How many + 複数名詞」の構文です。' },
-                    { ja: '私はオンラインゲームをしません。', en: ['I', 'don\'t', 'play', 'online', 'games.'], exp: '一般動詞の現在否定文（don\'t + 動詞の原形）です。' },
-                    { ja: 'あなたは幸せですか。', en: ['Are', 'you', 'happy?'], exp: '2人称 you に対応する be動詞の疑問文（Are you ~?）です。' },
-                    { ja: 'あなたはどうやって学校に来ますか。', en: ['How', 'do', 'you', 'come', 'to', 'school?'], exp: '交通手段や方法を尋ねる疑問詞 How を用いた疑問文です。' },
-                    { ja: '私は犬が好きではない。', en: ['I', 'don\'t', 'like', 'dogs.'], exp: '一般動詞の現在否定文（I don\'t + 動詞の原形）です。' }
-                ]
-            },
-            {
-                id: 'L2_L3_patterns',
-                title: 'Lesson 2-3: 基本文型 (第1〜第5文型)',
-                desc: 'SV / SVC / SVO / SVOO / SVOC の5つの基本文型と各種接続詞',
-                icon: 'fa-diagram-project',
-                color: 'from-violet-500 to-purple-600',
-                questions: [
-                    { ja: 'あなたは有名な歌手に似ています。', en: ['You', 'resemble', 'a', 'famous', 'singer.'], exp: 'S(You) + V(resemble) + O(a famous singer) の第3文型(SVO)です。' },
-                    { ja: '私のいとこはエンジニアです。', en: ['My', 'cousin', 'is', 'an', 'engineer.'], exp: 'S(My cousin) + V(is) + C(an engineer) の第2文型(SVC)です。' },
-                    { ja: '私たちの歴史の先生はとても若いです。', en: ['Our', 'history', 'teacher', 'is', 'very', 'young.'], exp: 'S(Our history teacher) + V(is) + C(very young) の第2文型(SVC)です。' },
-                    { ja: '私たちはケンを生徒会長に選んだ。', en: ['We', 'elected', 'Ken', 'student', 'council', 'president.'], exp: 'S(We) + V(elected) + O(Ken) + C(student council president) の第5文型(SVOC)です。' },
-                    { ja: '私はその犬をタローと名付けた。', en: ['I', 'named', 'the', 'dog', 'Taro.'], exp: 'S(I) + V(named) + O(the dog) + C(Taro) の第5文型(SVOC)です。' },
-                    { ja: '君を幸せにしてあげるよ。', en: ['I\'ll', 'make', 'you', 'happy.'], exp: 'S(I\'ll) + V(make) + O(you) + C(happy) の第5文型(SVOC)です。' },
-                    { ja: 'トムは私に好きだと言った。', en: ['Tom', 'told', 'me', 'he', 'loved', 'me.'], exp: 'S(Tom) + V(told) + O1(me) + O2(he loved me) の第4文型(SVOO)です。' },
-                    { ja: '私は中学校の運動会を楽しみました。', en: ['I', 'enjoyed', 'the', 'sports', 'day', 'in', 'junior', 'high', 'school.'], exp: 'S(I) + V(enjoyed) + O(the sports day...) の第3文型(SVO)です。' },
-                    { ja: '楽しそうですね。', en: ['You', 'look', 'happy.'], exp: 'S(You) + V(look) + C(happy) の第2文型(SVC)です。' },
-                    { ja: '修学旅行は私に素晴らしい思い出をくれました。', en: ['Our', 'school', 'trip', 'gave', 'me', 'wonderful', 'memories.'], exp: 'S(Our school trip) + V(gave) + O1(me) + O2(wonderful memories) の第4文型(SVOO)です。' },
-                    { ja: '母はよく料理の仕方を教えてくれます。', en: ['My', 'mother', 'often', 'teaches', 'me', 'how', 'to', 'cook.'], exp: 'teaches + O1(me) + O2(how to cook) の第4文型(SVOO)構造です。' },
-                    { ja: '彼はすばらしい選手だと私は思います。', en: ['I', 'think', 'that', 'he\'s', 'a', 'fantastic', 'player.'], exp: 'think + that節の目的語構造(SVO)です。' },
-                    { ja: '私たちは彼をジミーと呼ぶ。', en: ['We', 'call', 'him', 'Jimmy.'], exp: 'S(We) + V(call) + O(him) + C(Jimmy) の第5文型(SVOC)です。' },
-                    { ja: '彼女は引っ越してすぐに新しい友達ができた。', en: ['She', 'made', 'new', 'friends', 'as', 'soon', 'as', 'she', 'moved', 'there.'], exp: '接続詞 as soon as（〜するとすぐに）を用いた文です。' },
-                    { ja: '部活って楽しそうだね。', en: ['Club', 'activities', 'sound', 'fun.'], exp: 'S(Club activities) + V(sound) + C(fun) の第2文型(SVC)です。' },
-                    { ja: '残念ながら休み時間がもうすぐ終わります。', en: ['I\'m', 'afraid', 'that', 'the', 'break', 'will', 'be', 'over', 'soon.'], exp: '「I\'m afraid that ~」で「残念ながら〜と思う」を表します。' },
-                    { ja: '友達は私の苗字にちなんで，私のことをタカと呼びます。', en: ['My', 'friends', 'call', 'me', 'Taka', 'after', 'my', 'family', 'name.'], exp: '「call O C after ~」で「〜にちなんでOをCと呼ぶ」という意味です。' },
-                    { ja: 'そのアプリが英語学習に役立つと分かりました。', en: ['I', 'found', 'the', 'app', 'useful', 'for', 'English', 'learning.'], exp: 'S(I) + V(found) + O(the app) + C(useful) の第5文型(SVOC)です。' },
-                    { ja: 'あなたは私たちの学校の近くに住んでいるのですか。', en: ['Do', 'you', 'live', 'near', 'our', 'school?'], exp: '場所を表す前置詞句 near our school を伴う第1文型(SV)です。' },
-                    { ja: '私のクラスメートたちにクッキーを作りました。', en: ['I', 'made', 'my', 'classmates', 'some', 'cookies.'], exp: 'S(I) + V(made) + O1(my classmates) + O2(some cookies) の第4文型(SVOO)です。' },
-                    { ja: '両親は私にすてきなセーターを買ってくれた。', en: ['My', 'parents', 'bought', 'me', 'a', 'nice', 'sweater.'], exp: 'buy + O1(人) + O2(物) で「人に物を買い与える」第4文型です。' },
-                    { ja: '残念ながら私たちには今時間がありません。', en: ['I\'m', 'afraid', 'we', 'don\'t', 'have', 'time', 'right', 'now.'], exp: '「I\'m afraid + 節」で懸念や残念な気持ちを表します。' },
-                    { ja: 'シュンはその結果に満足していると思います。', en: ['I', 'think', 'that', 'Shun', 'is', 'happy', 'with', 'the', 'result.'], exp: '「be happy with ~」で「〜に満足している」を表します。' },
-                    { ja: '先生は私がなまけすぎだといつも言います。', en: ['My', 'teacher', 'always', 'says', 'that', 'I\'m', 'too', 'lazy.'], exp: 'S(My teacher) + V(says) + O(that節) の第3文型(SVO)構造です。' },
-                    { ja: 'あなたの電話番号を（教えて）くれませんか。', en: ['Can', 'you', 'give', 'me', 'your', 'phone', 'number?'], exp: 'give + O1(me) + O2(your phone number) の第4文型を用いた依頼表現です。' },
-                    { ja: 'あなたは電車で学校に来ているのですか。', en: ['Do', 'you', 'come', 'to', 'school', 'by', 'train?'], exp: '手段「by train」を伴う第1文型(SV)の疑問文です。' },
-                    { ja: 'そのドアを開けたままにしておいてくれますか。', en: ['Can', 'you', 'keep', 'the', 'door', 'open?'], exp: 'keep + O(the door) + C(open) の第5文型(SVOC)を用いた疑問文です。' },
-                    { ja: 'この教室には30人の生徒がいます。', en: ['There', 'are', 'thirty', 'students', 'in', 'this', 'classroom.'], exp: '「There are + 複数名詞」で存在を表す第1文型(SV)構文です。' },
-                    { ja: '両親はよく私に文句を言います。', en: ['My', 'parents', 'often', 'complain', 'to', 'me.'], exp: 'S(My parents) + V(complain) の第1文型(SV)です。' },
-                    { ja: '私の父は泳ぐのが本当に上手だ。', en: ['My', 'father', 'swims', 'really', 'well.'], exp: 'S(My father) + V(swims) の第1文型(SV)です。' },
-                    { ja: '私の父は週に１回，私に昼食を作ってくれます。', en: ['My', 'father', 'makes', 'me', 'lunch', 'once', 'a', 'week.'], exp: 'makes + O1(me) + O2(lunch) の第4文型(SVOO)です。' },
-                    { ja: 'ママ，犬がドアのところにいるよ。', en: ['Mommy,', 'there', 'is', 'a', 'dog', 'at', 'the', 'door.'], exp: 'There is + 単数名詞 の第1文型(SV)構造です。' },
-                    { ja: '私の母は料理が上手です。', en: ['My', 'mother', 'is', 'a', 'good', 'cook.'], exp: 'S(My mother) + V(is) + C(a good cook) の第2文型(SVC)です。' },
-                    { ja: 'それはすごいですね（それはすばらしいように聞こえますね）。', en: ['That', 'sounds', 'great.'], exp: 'S(That) + V(sounds) + C(great) の第2文型(SVC)です。' },
-                    { ja: '私はよくスパゲッティやピザを作ります。', en: ['I', 'often', 'make', 'spaghetti', 'or', 'pizza.'], exp: 'S(I) + V(make) + O(spaghetti or pizza) の第3文型(SVO)です。' },
-                    { ja: '私はこの制服のデザインが好きです。', en: ['I', 'like', 'the', 'design', 'of', 'this', 'school', 'uniform.'], exp: 'S(I) + V(like) + O(...) の第3文型(SVO)です。' },
-                    { ja: '私は1日8時間寝ません。', en: ['I', 'don\'t', 'sleep', 'eight', 'hours', 'a', 'day.'], exp: 'S(I) + V(don\'t sleep) の第1文型(SV)に時間を表す副詞句がついています。' },
-                    { ja: '私は新しいスマートフォンが欲しいです。', en: ['I', 'want', 'a', 'new', 'smartphone.'], exp: 'S(I) + V(want) + O(a new smartphone) の第3文型(SVO)です。' },
-                    { ja: '私は時間があるときにはたいてい料理をします。', en: ['I', 'usually', 'cook', 'when', 'I', 'have', 'time.'], exp: 'cook(第1文型) に when節（副詞節）が接続した文です。' },
-                    { ja: '彼は興味深い本を読んだ。', en: ['He', 'read', 'an', 'interesting', 'book.'], exp: 'S(He) + V(read) + O(an interesting book) の第3文型(SVO)です。' },
-                    { ja: 'その会議が終わった後，彼は自分に何ができるかを私に尋ねた。', en: ['After', 'the', 'meeting', 'ended,', 'he', 'asked', 'me', 'what', 'he', 'could', 'do.'], exp: 'S(he) + V(asked) + O1(me) + O2(what he could do) の第4文型(SVOO)です。' }
-                ]
-            },
-            {
-                id: 'L4_L5_tenses',
-                title: 'Lesson 4-5: 時制・時間表現 (Tenses)',
-                desc: '現在・過去・未来・進行形・予定 (be going to / will)・習慣・不変の真理',
-                icon: 'fa-clock',
-                color: 'from-emerald-500 to-teal-600',
-                questions: [
-                    { ja: 'そのとき，彼らはルーシーとおしゃべりしていました。', en: ['They', 'were', 'chatting', 'with', 'Lucy', 'at', 'that', 'time.'], exp: '過去進行形 (were + chatting) で当時の動作を表します。' },
-                    { ja: '私はあなたの優しさを決して忘れないでしょう。', en: ['I', 'will', 'never', 'forget', 'your', 'kindness.'], exp: '意志の助動詞 will に否定語 never を組み合わせた文です。' },
-                    { ja: '私の親友はネコを1匹，犬を2匹飼っています。', en: ['My', 'best', 'friend', 'has', 'a', 'cat', 'and', 'two', 'dogs.'], exp: '現在の状態を表す現在形 has（3人称単数）です。' },
-                    { ja: 'ロビンは中国系カナダ人で，トロントに住んでいます。', en: ['Robin', 'is', 'Sino-Canadian', 'and', 'lives', 'in', 'Toronto.'], exp: '現在の状態を表す現在形の並列構造です。' },
-                    { ja: '自動運転車はこの町の空気をよりきれいにするでしょう。', en: ['Self-driving', 'cars', 'will', 'make', 'this', 'city\'s', 'air', 'cleaner.'], exp: '未来の予測を表す will + 動詞の原形 です。' },
-                    { ja: '私は電話があった時，入浴していました。', en: ['I', 'was', 'taking', 'a', 'bath', 'when', 'I', 'got', 'the', 'call.'], exp: '過去の進行中動作を表す過去進行形 (was taking) です。' },
-                    { ja: '私たちは日曜日にそのワークショップを訪れる予定です。', en: ['We', 'are', 'visiting', 'the', 'workshop', 'on', 'Sunday.'], exp: '現在進行形 (are visiting) で確定した近い未来の予定を表します。' },
-                    { ja: '私の父は今より若い頃，ゴルフをしていた。', en: ['My', 'father', 'used', 'to', 'play', 'golf', 'when', 'he', 'was', 'younger.'], exp: '「used to + 動詞の原形」で過去の継続的習慣を表します。' },
-                    { ja: '傘をもっていきなさい。あとで雨になるから。', en: ['Take', 'an', 'umbrella.', 'It', 'will', 'rain', 'later.'], exp: '未来の予測を表す will rain です。' },
-                    { ja: 'ケンは来週祖父母を訪れる予定です。', en: ['Ken', 'is', 'visiting', 'his', 'grandparents', 'next', 'week.'], exp: '現在進行形 (is visiting) で未来の予定を示します。' },
-                    { ja: '私は1つの言語を知っています。', en: ['I', 'know', 'one', 'language.'], exp: '状態を表す動詞 know の現在形です。' },
-                    { ja: 'その自動運転車はゴールラインの前で止まりかけていました。', en: ['The', 'self-driving', 'car', 'was', 'stopping', 'before', 'the', 'goal', 'line.'], exp: '過去進行形 (was stopping) で進行中の場面を描写します。' },
-                    { ja: 'あの子どもは今，何をしているのですか。', en: ['What', 'is', 'that', 'child', 'doing', 'now?'], exp: '現在進行形の疑問文 (What + is + 主語 + doing ?) です。' },
-                    { ja: '大学では科学技術を勉強するつもりです。', en: ['I', 'am', 'going', 'to', 'study', 'science', 'and', 'technology', 'at', 'university.'], exp: 'あらかじめ意図している未来の計画を表す be going to です。' },
-                    { ja: '私の父は毎日，始発電車に乗ります。', en: ['My', 'dad', 'takes', 'the', 'first', 'train', 'every', 'day.'], exp: '日々の習慣的動作を表すため現在形 takes を使います。' },
-                    { ja: 'ペドロは家にロボット掃除機を持っています。', en: ['Pedro', 'has', 'a', 'robot', 'vacuum', 'cleaner', 'at', 'home.'], exp: '現在の所有状態を表す現在形 has です。' },
-                    { ja: 'ジェーンは明日，そのパーティーに来るだろうか。', en: ['Will', 'Jane', 'come', 'to', 'the', 'party', 'tomorrow?'], exp: '未来の疑問文 Will + 主語 + 動詞の原形 です。' },
-                    { ja: 'お差し支えなければ明日お伺いします。', en: ['If', 'you', 'don\'t', 'mind,', 'I', 'will', 'visit', 'you', 'tomorrow.'], exp: '条件を表す if節の中は現在形 (don\'t mind) になります。' },
-                    { ja: 'その店は今，特別なイベントを開催しています。', en: ['The', 'store', 'is', 'holding', 'a', 'special', 'event', 'now.'], exp: '「今まさに進行中」の動作を表す現在進行形 (is holding) です。' },
-                    { ja: '私はロンドンへの旅行を計画しているところです。', en: ['I', 'am', 'planning', 'a', 'trip', 'to', 'London.'], exp: '現在進行形 (am planning) です。' },
-                    { ja: '雨が降り始めた。', en: ['It', 'started', 'to', 'rain.'], exp: '過去の出来事を表す過去形 (started) です。' },
-                    { ja: '私の誕生日は来週の月曜日です。', en: ['My', 'birthday', 'is', 'next', 'Monday.'], exp: '確定したカレンダー上の未来事項は現在形 is で表せます。' },
-                    { ja: '地球は太陽の周りを回っている。', en: ['The', 'earth', 'goes', 'around', 'the', 'sun.'], exp: '不変の真理・自然現象を表すため常に現在形 (goes) を使います。' },
-                    { ja: '私たちは5年前この町に引っ越してきました。', en: ['We', 'moved', 'to', 'this', 'town', 'five', 'years', 'ago.'], exp: '明確な過去の時点 (five years ago) を示す過去形 moved です。' },
-                    { ja: '親にロボット掃除機を買ってと頼んでみます。', en: ['I', 'will', 'ask', 'my', 'parents', 'to', 'buy', 'a', 'robot', 'vacuum', 'cleaner.'], exp: 'その場での意志を表す will ask です。' },
-                    { ja: 'そのワークショップは午後2時に始まります。', en: ['The', 'workshop', 'starts', 'at', '2', 'p.m.'], exp: 'タイムスケジュールや確定した未来は現在形 (starts) で表します。' },
-                    { ja: 'ケンは午後に宅配ドローンのブースを訪れることになっています。', en: ['Ken', 'is', 'visiting', 'the', 'delivery', 'drone', 'booth', 'in', 'the', 'afternoon.'], exp: '確定した予定を表す現在進行形 (is visiting) です。' },
-                    { ja: '毎週土曜の午前中にオンラインレッスンを受けています。', en: ['I', 'take', 'online', 'lessons', 'every', 'Saturday', 'morning.'], exp: '習慣的動作を表す現在形 take です。' },
-                    { ja: 'わかった。すぐに彼女に電話を入れるよ。', en: ['OK,', 'I', 'will', 'phone', 'her', 'right', 'away.'], exp: 'その場での意思決定を表す will + 動詞の原形 です。' },
-                    { ja: '私は宅配ドローンのブースを訪れました。', en: ['I', 'visited', 'the', 'delivery', 'drone', 'booth.'], exp: '過去の出来事を表す過去形 visited です。' },
-                    { ja: 'スマートウォッチが出てくる前は普通の腕時計を使っていました。', en: ['I', 'used', 'a', 'regular', 'wristwatch', 'before', 'smartwatches', 'came', 'out.'], exp: '過去の状態を表す過去形 used です。' },
-                    { ja: 'AIは膨大なデータに依存しています。', en: ['AI', 'relies', 'on', 'a', 'vast', 'amount', 'of', 'data.'], exp: '一般的な事実や状態を表す現在形 relies です。' },
-                    { ja: '彼はそのとき展示会のことを話していました。', en: ['He', 'was', 'talking', 'about', 'the', 'exhibition', 'at', 'that', 'time.'], exp: '過去のある時点での進行中動作を表す過去進行形 (was talking) です。' },
-                    { ja: 'もうすぐ雨になるよ。', en: ['It', 'is', 'going', 'to', 'rain', 'soon.'], exp: '目に見える兆候に基づいた未来の予測 (is going to rain) です。' },
-                    { ja: 'あなたはパーティーをするつもりですか。', en: ['Are', 'you', 'going', 'to', 'have', 'a', 'party?'], exp: '意図・計画を尋ねる be going to の疑問文です。' },
-                    { ja: 'このパソコンは過熱している。すぐに壊れるよ。', en: ['This', 'computer', 'is', 'overheating.', 'It', 'will', 'break', 'soon.'], exp: '進行形 (is overheating) と未来の推測 (will break) の組み合わせです。' },
-                    { ja: '私は木曜日にケイコと映画を見る予定です。', en: ['I', 'am', 'seeing', 'Keiko', 'on', 'Thursday.'], exp: '取り決めた予定を表す現在進行形 (am seeing) です。' },
-                    { ja: 'そのコンサートは4時に始まります。', en: ['The', 'concert', 'starts', 'at', 'four.'], exp: '時刻表・スケジュールの現在形 (starts) です。' }
-                ]
-            },
-            {
-                id: 'L6_L7_perfect',
-                title: 'Lesson 6-7: 完了形 (Perfect Tenses)',
-                desc: '現在完了・過去完了・未来完了（継続・経験・完了・結果・進行形）',
-                icon: 'fa-hourglass-half',
-                color: 'from-amber-500 to-orange-600',
-                questions: [
-                    { ja: 'ケンとジェーンは10年間知り合いです。', en: ['Ken', 'and', 'Jane', 'have', 'known', 'each', 'other', 'for', '10', 'years.'], exp: '【継続】の現在完了形 (have known) です。' },
-                    { ja: '私は今朝からずっと自分の部屋を掃除し続けているんです。', en: ['I\'ve', 'been', 'cleaning', 'my', 'room', 'since', 'this', 'morning.'], exp: '【現在完了進行形】(have been cleaning) です。' },
-                    { ja: 'そのカフェは開店して以来ずっと人気があります。', en: ['The', 'café', 'has', 'been', 'popular', 'since', 'it', 'opened.'], exp: 'since + 過去の起点を伴う現在完了形 (has been) です。' },
-                    { ja: '私は本を読んでいたから，映画のエンディングを知っていました。', en: ['I', 'knew', 'the', 'ending', 'of', 'the', 'movie', 'because', 'I', 'had', 'read', 'the', 'book.'], exp: '【過去完了形】(had read) です。' },
-                    { ja: '私の叔父は先月からずっと入院しています。', en: ['My', 'uncle', 'has', 'been', 'in', 'the', 'hospital', 'since', 'last', 'month.'], exp: '現在完了形 (has been) です。' },
-                    { ja: '駅の近くに新しい書店がオープンしたの知ってた？', en: ['Did', 'you', 'know', 'that', 'a', 'new', 'bookstore', 'has', 'opened', 'near', 'the', 'station?'], exp: '従属節内で「オープンした（完了・結果）」を表す現在完了形 (has opened) を使用しています。' },
-                    { ja: 'あなたと会う前に，そのカフェで30分ほど本を読んでいました。', en: ['Before', 'I', 'met', 'you,', 'I', 'had', 'been', 'reading', 'a', 'book', 'at', 'the', 'café', 'for', 'about', '30', 'minutes.'], exp: '過去のある時点までの継続的動作を表す【過去完了進行形】(had been reading) です。' },
-                    { ja: '私の父は風邪をひいてしまいました。', en: ['My', 'father', 'has', 'caught', 'a', 'cold.'], exp: '【完了・結果】を表す現在完了形 (has caught) です。' },
-                    { ja: '弟なら近くのレストランに行ったよ。', en: ['My', 'brother', 'has', 'gone', 'to', 'the', 'nearby', 'restaurant.'], exp: '「have gone to ~」で「行ってしまっていまはいない（結果）」を表します。' },
-                    { ja: '見て！ 雨がやんだわ。', en: ['Look!', 'It\'s', 'stopped', 'raining.'], exp: '【完了・結果】を表す現在完了形です。' },
-                    { ja: '今までにカナダに行ったことはありますか。', en: ['Have', 'you', 'ever', 'been', 'to', 'Canada?'], exp: '【経験】を尋ねる Have you ever been to ~ ? です。' },
-                    { ja: 'あなたがこの町を出た時，そのレストランはまだ開店していませんでした。', en: ['When', 'you', 'left', 'this', 'town,', 'the', 'restaurant', 'hadn\'t', 'opened', 'yet.'], exp: '過去のある時点での未完了を表す【過去完了形】(hadn\'t opened) です。' },
-                    { ja: '私がこの町を出る前，その家は何年も空き家のままだったよ。', en: ['Before', 'I', 'left', 'this', 'town,', 'the', 'house', 'had', 'been', 'empty', 'for', 'years.'], exp: '過去のある時点までの状態の継続を表す【過去完了形】(had been) です。' },
-                    { ja: 'あなたが野球部を辞めたことを，ちょうど聞いたところです。', en: ['I', 'have', 'just', 'heard', 'that', 'you', 'quit', 'the', 'baseball', 'club.'], exp: 'ちょうど完了したことを表す「have just + 過去分詞」の構文です。' },
-                    { ja: '私たちは長い間ここに住んでいます。', en: ['We', 'have', 'lived', 'here', 'for', 'a', 'long', 'time.'], exp: '現在完了形【継続】の表現です。' },
-                    { ja: 'ジェーンは去年から旅し続けている。', en: ['Jane', 'has', 'been', 'traveling', 'since', 'last', 'year.'], exp: '過去から現在まで動作が継続していることを表す【現在完了進行形】です。' },
-                    { ja: '私はすでに昼食を食べ終えました。', en: ['I', 'have', 'already', 'finished', 'eating', 'lunch.'], exp: '【完了】を表す have + already + 過去分詞 です。' },
-                    { ja: '私の祖父は1年間車を運転していません。', en: ['My', 'grandfather', 'has', 'not', 'driven', 'a', 'car', 'for', 'one', 'year.'], exp: '継続的な否定状態を表す現在完了形 (has not driven) です。' },
-                    { ja: '私たちの村に来てみようと思ったことはありますか。', en: ['Have', 'you', 'ever', 'thought', 'of', 'coming', 'to', 'our', 'village?'], exp: '【経験】を尋ねる「Have you ever + 過去分詞 ?」の構文です。' },
-                    { ja: 'だいじょうぶ。あなたの部屋を掃除しておいたわよ。', en: ['Don\'t', 'worry.', 'I\'ve', 'cleaned', 'your', 'room.'], exp: '動作が完了してその結果が現在に残っていることを表す現在完了形です。' },
-                    { ja: 'その学校は1年前に閉校していたと分かりました。', en: ['I', 'found', 'that', 'the', 'school', 'had', 'closed', 'down', 'one', 'year', 'before.'], exp: '「〜だと分かった(過去)」より前の出来事を表す【過去完了形】(had closed down) です。' },
-                    { ja: '彼らは結婚する前に7年間，知り合いだったんですよ。', en: ['They', 'had', 'known', 'each', 'other', 'for', 'seven', 'years', 'before', 'they', 'got', 'married.'], exp: '過去に結婚するまでの7年間の継続を表す【過去完了形】です。' },
-                    { ja: 'ゲームが始まる頃までには，雨は止んでいた。', en: ['By', 'the', 'time', 'the', 'game', 'started,', 'it', 'had', 'stopped', 'raining.'], exp: '「By the time + 過去形」と組み合わせた【過去完了形】(had stopped) です。' },
-                    { ja: 'その試合は私がスタジアムに着いたときには，すでに始まっていました。', en: ['The', 'game', 'had', 'already', 'started', 'when', 'I', 'got', 'to', 'the', 'stadium.'], exp: '【過去完了形】(had already started) です。' },
-                    { ja: '去年からずっと本をネットで買っているんだ。', en: ['I\'ve', 'been', 'buying', 'books', 'online', 'since', 'last', 'year.'], exp: '過去から現在まで継続している動作を表す【現在完了進行形】です。' },
-                    { ja: '今年買う前は，私はスマートフォンを使ったことがありませんでした。', en: ['I', 'had', 'never', 'used', 'a', 'smartphone', 'before', 'I', 'bought', 'one', 'this', 'year.'], exp: '過去のある時点までの【経験】の否定を表す【過去完了形】です。' },
-                    { ja: '私は7年間英語を勉強しています。', en: ['I', 'have', 'been', 'studying', 'English', 'for', 'seven', 'years.'], exp: '現在完了進行形 (have been studying) です。' },
-                    { ja: '私たちはロサンゼルスのユニバーサルスタジオに行ったことがあります。', en: ['We\'ve', 'been', 'to', 'Universal', 'Studios', 'in', 'Los', 'Angeles.'], exp: '「have been to ~」で「〜に行ったことがある（経験）」を表します。' },
-                    { ja: '父は長い小説をちょうど読み終えたところだ。', en: ['My', 'father', 'has', 'just', 'finished', 'reading', 'a', 'long', 'novel.'], exp: 'ちょうど完了した動作を表す「has just finished」です。' },
-                    { ja: '私の弟は宿題を終えました。', en: ['My', 'brother', 'has', 'finished', 'his', 'homework.'], exp: '現在完了形 (has finished) です。' },
-                    { ja: '私の母は買い物に出かけてしまいました。', en: ['My', 'mother', 'has', 'gone', 'shopping.'], exp: '「has gone shopping」で「買い物に行ってしまった（ここにはいない）」を表します。' },
-                    { ja: '私が目を覚ましたとき，母はすでに外出していました。', en: ['When', 'I', 'woke', 'up,', 'my', 'mother', 'had', 'already', 'gone', 'out.'], exp: '目を覚ました過去の時点ですでに外出していたことを表す【過去完了形】です。' },
-                    { ja: 'あなたは英語で履歴書を書いたことがありますか。', en: ['Have', 'you', 'ever', 'written', 'a', 'resume', 'in', 'English?'], exp: '経験を尋ねる「Have you ever + 過去分詞 ?」です。' },
-                    { ja: '私はシャツを洗いました。', en: ['I', 'have', 'washed', 'my', 'shirt.'], exp: 'シャツを洗って今はきれいになっているという状態・完了を表します。' },
-                    { ja: '私たちは3年間ずっとチームメートです。', en: ['We\'ve', 'been', 'teammates', 'for', 'three', 'years.'], exp: '状態の継続を表す現在完了形 (have been) です。' },
-                    { ja: 'その学校が閉校する前， 私の友だちと私は学園祭に参加するためにそこに行ったことがありました。', en: ['Before', 'the', 'school', 'closed,', 'my', 'friend', 'and', 'I', 'had', 'been', 'there', 'to', 'join', 'the', 'school', 'festival.'], exp: '過去の時点までの経験を表す【過去完了形】です。' },
-                    { ja: '私たちは1時間バスを待ち続けています。', en: ['We', 'have', 'been', 'waiting', 'for', 'the', 'bus', 'for', 'an', 'hour.'], exp: '現在まで継続している動作を表す【現在完了進行形】です。' },
-                    { ja: '弟は今朝からオンラインゲームをし続けています。', en: ['My', 'brother', 'has', 'been', 'playing', 'an', 'online', 'game', 'since', 'this', 'morning.'], exp: '動作の継続を表す【現在完了進行形】です。' },
-                    { ja: '私は10時までには宿題を終わらせているよ。', en: ['I', 'will', 'have', 'finished', 'my', 'homework', 'by', 'ten.'], exp: '【未来完了形】(will have finished) です。' },
-                    { ja: '今日の野球の試合は9時までには終わっているでしょう。', en: ['Today\'s', 'baseball', 'game', 'will', 'have', 'finished', 'by', 'nine', 'o\'clock.'], exp: '未来のある時点での完了を予測する【未来完了形】です。' },
-                    { ja: '私はそんなに個性的な書店を見たことがありません。', en: ['I\'ve', 'never', 'seen', 'such', 'a', 'unique', 'bookstore.'], exp: '経験の否定を表す「have never + 過去分詞」です。' },
-                    { ja: '母は出かけてしまって，今ここにいません。', en: ['My', 'mother', 'has', 'gone', 'out', 'and', 'is', 'not', 'here', 'now.'], exp: '「has gone out」で「出かけてしまっていまはいない」結果を表します。' },
-                    { ja: '長野へ行くまで，私はスキーをしたことがありませんでした。', en: ['I', 'had', 'never', 'skied', 'before', 'I', 'went', 'to', 'Nagano.'], exp: '過去のある時点までの経験否定を表す【過去完了形】です。' },
-                    { ja: '私が二十歳になるまでには，より多くの人がこの町に引っ越してきているでしょう。', en: ['By', 'the', 'time', 'I', 'am', '20,', 'more', 'people', 'will', 'have', 'moved', 'to', 'this', 'town.'], exp: '未来の時点での完了を予測する【未来完了形】です。' },
-                    { ja: 'この神社は，1000年ここにあります。', en: ['This', 'shrine', 'has', 'been', 'here', 'for', 'a', 'thousand', 'years.'], exp: '状態の継続を表す現在完了形です。' }
-                ]
-            },
-            {
-                id: 'L8_L10_auxiliary',
-                title: 'Lesson 8-10: 助動詞 (Auxiliary Verbs)',
-                desc: 'can / must / should / may / have to / had better / 過去への推測など（全60問）',
-                icon: 'fa-bolt',
-                color: 'from-rose-500 to-pink-600',
-                questions: [
-                    { ja: '2階の洗面所を使ってもよろしいですか。', en: ['May', 'I', 'use', 'the', 'restroom', 'on', 'the', 'second', 'floor?'], exp: '「May I ~?」で「〜してもよろしいですか」という丁寧な許可の求めを表します。' },
-                    { ja: 'お手伝いしましょうか。', en: ['Shall', 'I', 'help', 'you?'], exp: '「Shall I ~?」で「（私が）〜しましょうか」という申し出を表します。' },
-                    { ja: 'その道具は、前回の災害の時に役に立ったかもしれない。', en: ['The', 'tool', 'may', 'have', 'been', 'useful', 'during', 'the', 'last', 'disaster.'], exp: '「may have + 過去分詞」で「〜だったかもしれない（過去の推測）」を表します。' },
-                    { ja: '怪我が大したことないの？ホッとしたでしょう！', en: ['The', 'injury', 'isn\'t', 'serious?', 'You', 'must', 'be', 'relieved!'], exp: '「must + 動詞の原形」で「〜に違いない」という強い確信の推測を表します。' },
-                    { ja: '彼がそんなことを言ったはずがない。', en: ['He', 'can\'t', 'have', 'said', 'that.'], exp: '「can\'t have + 過去分詞」で「〜したはずがない（過去の打ち消しの推測）」を表します。' },
-                    { ja: '私の消しゴム使ってもいいよ。', en: ['You', 'can', 'use', 'my', 'eraser.'], exp: '助動詞「can」で「〜してもよい」という許可を表します。' },
-                    { ja: '私はもっと一生懸命勉強すべきだった（のに実際にはしなかった）。', en: ['I', 'should', 'have', 'studied', 'harder.'], exp: '「should have + 過去分詞」で「〜すべきだった（のにしなかった）」という後悔・非難を表します。' },
-                    { ja: '手伝ってあげるよ。', en: ['I\'ll', 'give', 'you', 'a', 'hand.'], exp: '「will (I\'ll)」でその場での意志「〜してあげるよ」を表します。' },
-                    { ja: '地震が前兆なしに起きるはずがないと信じる人もいます。', en: ['Some', 'believe', 'that', 'earthquakes', 'can\'t', 'occur', 'without', 'signs.'], exp: '「can\'t + 原形」で「〜するはずがない」という強い否定の推測を表します。' },
-                    { ja: '身分証明書なしでこの区域に入ることはできません。', en: ['You', 'can\'t', 'enter', 'this', 'area', 'without', 'your', 'ID', 'card.'], exp: '「can\'t」で「〜してはいけない／〜できない」という禁止・不可能性を表します。' },
-                    { ja: '救急車を呼んだほうがいいよ！', en: ['You\'d', 'better', 'call', 'an', 'ambulance!'], exp: '「had better + 原形」で「〜したほうがいい（忠告・強い勧め）」を表します。' },
-                    { ja: '私たちは大きな台風に備えなければなりません。', en: ['We', 'must', 'prepare', 'for', 'the', 'big', 'typhoon.'], exp: '「must + 原形」で「〜しなければならない」という強い義務を表します。' },
-                    { ja: '彼女に何かあったのかもしれない。', en: ['Something', 'may', 'have', 'happened', 'to', 'her.'], exp: '「may have + 過去分詞」で「〜したかもしれない（過去の推測）」を表します。' },
-                    { ja: '災害に備えて水と食料が欲しいのですが。', en: ['I', 'would', 'like', 'some', 'water', 'and', 'food', 'to', 'prepare', 'for', 'disasters.'], exp: '「would like ~」で「〜が欲しいのですが」という丁寧な欲望を表します。' },
-                    { ja: '窓を開けていただけますか。', en: ['Could', 'you', 'open', 'the', 'window?'], exp: '「Could you ~?」で「〜していただけますか」という丁寧な依頼を表します。' },
-                    { ja: '入ってもよろしいでしょうか。', en: ['May', 'I', 'come', 'in?'], exp: '「May I ~?」で丁寧な許可を求める表現です。' },
-                    { ja: '彼らは非常用備蓄品を持っていなかったので、安心できたはずがない。', en: ['They', 'can\'t', 'have', 'felt', 'safe', 'because', 'they', 'had', 'no', 'emergency', 'supplies.'], exp: '「can\'t have + 過去分詞」で「〜であったはずがない」という推測を表します。' },
-                    { ja: 'あなたたちはこのレポートを時間どおりに仕上げなければなりません。', en: ['You', 'must', 'finish', 'this', 'report', 'on', 'time.'], exp: '「must」で義務「〜しなければならない」を表します。' },
-                    { ja: '明日は台風だから外出しないほうがいいよ。', en: ['You', 'had', 'better', 'not', 'go', 'out', 'tomorrow', 'because', 'of', 'the', 'typhoon.'], exp: '「had better not + 原形」で「〜しないほうがいい（否定の忠告）」を表します。' },
-                    { ja: '手伝ってくれる？', en: ['Can', 'you', 'give', 'me', 'a', 'hand?'], exp: '「Can you ~?」で「〜してくれる？」というカジュアルな依頼を表します。' },
-                    { ja: '避難所の場所を確認するべきです。', en: ['You', 'ought', 'to', 'check', 'the', 'location', 'of', 'the', 'evacuation', 'shelter.'], exp: '「ought to + 原形」で「〜すべきである」という義務・義務的助言を表します。' },
-                    { ja: '先月の台風の間、多くの人が大変な目にあったに違いない。', en: ['Many', 'people', 'must', 'have', 'had', 'a', 'hard', 'time', 'during', 'the', 'typhoon', 'last', 'month.'], exp: '「must have + 過去分詞」で「〜だったに違いない（過去の強い確信）」を表します。' },
-                    { ja: '自然災害に備えて非常食と水を蓄えるべきです。', en: ['You', 'should', 'store', 'emergency', 'food', 'and', 'water', 'in', 'case', 'of', 'a', 'natural', 'disaster.'], exp: '「should」で「〜すべきだ」というアドバイス・義務を表します。' },
-                    { ja: '台風がこのあたりを襲うかもしれない。', en: ['The', 'typhoon', 'may', 'hit', 'around', 'here.'], exp: '「may + 原形」で「〜かもしれない」という現在・未来の推測を表します。' },
-                    { ja: 'ケンジは100メートルを11秒で走ることができます。', en: ['Kenji', 'can', 'run', '100', 'meters', 'in', '11', 'seconds.'], exp: '「can」で能力・可能「〜できる」を表します。' },
-                    { ja: '私は以前、群馬に住んでいました。', en: ['I', 'used', 'to', 'live', 'in', 'Gunma.'], exp: '「used to + 原形」で「かつて〜だった（過去の状態・継続的習慣）」を表します。' },
-                    { ja: '避難所への行き方を教えましょうか。', en: ['Shall', 'I', 'tell', 'you', 'how', 'to', 'get', 'to', 'the', 'evacuation', 'shelter?'], exp: '「Shall I ~?」で「〜しましょうか」という親切な提案を表します。' },
-                    { ja: 'あなたはこの非常食を持って行ってよいです。', en: ['You', 'may', 'take', 'this', 'emergency', 'food.'], exp: '「may」で「〜してもよい」という許可を表します。' },
-                    { ja: 'あなたはお金の使い方にもっと注意すべきです。', en: ['You', 'should', 'be', 'more', 'careful', 'with', 'your', 'money.'], exp: '「should」で助言「〜すべきだ」を表します。' },
-                    { ja: 'そこでは夏でも寒くなることがあります。', en: ['It', 'can', 'be', 'cold', 'even', 'in', 'summer', 'there.'], exp: '「can」で「〜することがある（理論上の可能性）」を表します。' },
-                    { ja: 'それは本当のはずがない。', en: ['That', 'can\'t', 'be', 'true.'], exp: '「can\'t + 原形」で「〜なはずがない」という強い否定の確信を表します。' },
-                    { ja: '大きな台風が襲うので危険になり得ます。', en: ['It', 'can', 'be', 'dangerous', 'because', 'the', 'big', 'typhoon', 'will', 'hit.'], exp: '「can」で「〜であり得る（可能性）」を表します。' },
-                    { ja: '母は今頃もう家に着いているはずだ。', en: ['My', 'mom', 'should', 'have', 'arrived', 'home', 'by', 'now.'], exp: '「should have + 過去分詞」で「今頃は〜しているはずだ（強い期待・推測）」を表します。' },
-                    { ja: '水がすべて売り切れた。それなら、私は緑茶を買おう。', en: ['All', 'the', 'water', 'is', 'sold', 'out.', 'Then,', 'I', 'will', 'buy', 'green', 'tea.'], exp: '「will」で「〜しよう」というその場での意志を表します。' },
-                    { ja: '私はあなたのアドバイスに従うべきだった（のに従わなかった）。', en: ['I', 'should', 'have', 'taken', 'your', 'advice.'], exp: '「should have + 過去分詞」で過去の後悔「〜すべきだった」を表します。' },
-                    { ja: '避難する最中にモバイルバッテリーを落としたかもしれない。', en: ['I', 'could', 'have', 'dropped', 'my', 'mobile', 'battery', 'while', 'evacuating.'], exp: '「could have + 過去分詞」で「〜したかもしれない（ひょっとすると〜だった）」を表します。' },
-                    { ja: 'かつては非常食を家に備えていました。', en: ['I', 'used', 'to', 'keep', 'emergency', 'food', 'at', 'home.'], exp: '「used to + 原形」で「以前は〜していた（習慣・過去の状態）」を表します。' },
-                    { ja: '東京は4月にとっても寒くなることがある。', en: ['Tokyo', 'can', 'be', 'very', 'cold', 'in', 'April.'], exp: '「can」で「〜することがある（一般的な可能性）」を表します。' },
-                    { ja: '私の兄と私は今日買い物に行かなければなりません。', en: ['My', 'brother', 'and', 'I', 'must', 'go', 'shopping', 'today.'], exp: '「must」で義務を表します。' },
-                    { ja: '冷たい水でカップラーメンを作ることができるの？', en: ['Can', 'we', 'make', 'cup', 'ramen', 'with', 'cold', 'water?'], exp: '「Can we ~?」で可能性・能力を尋ねる疑問文です。' },
-                    { ja: '子どもの頃、私は緊急時によくパニックになったものだった。', en: ['As', 'a', 'child,', 'I', 'would', 'often', 'panic', 'in', 'an', 'emergency.'], exp: '「would often + 原形」で「よく〜したものだった（過去の不規則な習慣）」を表します。' },
-                    { ja: 'これで京都の8回目の旅行になるだろうな。', en: ['This', 'would', 'be', 'my', 'eighth', 'trip', 'to', 'Kyoto.'], exp: '「would」で控えめな推測「〜になるだろう」を表します。' },
-                    { ja: 'それは地球温暖化のせいにちがいありません。', en: ['It', 'must', 'be', 'because', 'of', 'global', 'warming.'], exp: '「must be ~」で「〜に違いない」という断定的な推測を表します。' },
-                    { ja: '我が母は一生懸命働いたので疲れているにちがいない。', en: ['My', 'mother', 'must', 'be', 'tired', 'because', 'she', 'worked', 'hard.'], exp: '「must be」で「〜に違いない」を表します。' },
-                    { ja: '我が母は5年前に非常食セットを買っておくべきだった（買ったはずだ）。', en: ['My', 'mother', 'should', 'have', 'bought', 'an', 'emergency', 'food', 'set', '5', 'years', 'ago.'], exp: '「should have + 過去分詞」で「〜しておくべきだった」を表します。' },
-                    { ja: '私たちは今年の夏、スペインに行くかもしれません。', en: ['We', 'may', 'go', 'to', 'Spain', 'this', 'summer.'], exp: '「may」で「〜するかもしれない（控えめな推測）」を表します。' },
-                    { ja: '彼らは道に迷ったにちがいない。', en: ['They', 'must', 'have', 'lost', 'their', 'way.'], exp: '「must have + 過去分詞」で「〜したに違いない（過去の強い推測）」を表します。' },
-                    { ja: '明日、非常食をいくらか買いましょうか。', en: ['Shall', 'we', 'buy', 'some', 'emergency', 'food', 'tomorrow?'], exp: '「Shall we ~?」で「（いっしょに）〜しましょうか」という勧誘・提案を表します。' },
-                    { ja: '被災地で食料を手に入れるのは難しいかもしれません。', en: ['It', 'may', 'be', 'difficult', 'to', 'get', 'food', 'in', 'affected', 'areas.'], exp: '「may be ~」で「〜かもしれない」を表します。' },
-                    { ja: '募金しましょうか。', en: ['Shall', 'we', 'donate?'], exp: '「Shall we ~?」で提案・勧誘を表します。' },
-                    { ja: '私は7時までにそのレストランに到着できるはずです。', en: ['I', 'should', 'be', 'able', 'to', 'get', 'to', 'the', 'restaurant', 'by', 'seven.'], exp: '「should be able to ~」で「〜できるはずだ」という確信の推測を表します。' },
-                    { ja: '今、このアルファ米を食べていいですよ。', en: ['You', 'can', 'eat', 'this', 'alpha', 'rice', 'now.'], exp: '「can」で許可「〜してよい」を表します。' },
-                    { ja: 'あなたがたが避難所で必要とされているものを教えていただけますか。', en: ['Could', 'you', 'tell', 'me', 'what', 'you', 'need', 'in', 'the', 'evacuation', 'shelter?'], exp: '「Could you ~?」で丁寧な依頼を表します。' },
-                    { ja: 'この町では自然災害について考えずにはいられません。', en: ['In', 'this', 'town,', 'we', 'can\'t', 'help', 'thinking', 'about', 'natural', 'disasters.'], exp: '「can\'t help -ing」で「〜せずにはいられない」という慣用表現です。' },
-                    { ja: 'この非常食を試食してくれる？', en: ['Can', 'you', 'try', 'this', 'emergency', 'food?'], exp: '「Can you ~?」で依頼を表します。' },
-                    { ja: '明日の朝、もっと多くの食料と水が届くでしょうか。', en: ['Will', 'more', 'food', 'and', 'water', 'come', 'in', 'tomorrow', 'morning?'], exp: '「Will ~?」で未来の予測・疑問を表します。' },
-                    { ja: '私は家にスマートフォンを忘れてきたかもしれない。', en: ['I', 'could', 'have', 'left', 'my', 'smartphone', 'at', 'home.'], exp: '「could have + 過去分詞」で「〜したかもしれない」という過去の可能性を表します。' },
-                    { ja: '非常食が売り切れる前にもっと早く来るべきだった（来なかった）。', en: ['I', 'should', 'have', 'come', 'earlier', 'before', 'the', 'emergency', 'food', 'sold', 'out.'], exp: '「should have + 過去分詞」で後悔「〜すべきだったのに」を表します。' },
-                    { ja: '緊急の場合には、そのドアは自動的に開くはずです。', en: ['In', 'case', 'of', 'an', 'emergency,', 'the', 'door', 'should', 'open', 'automatically.'], exp: '「should + 原形」で「（当然）〜するはずだ」という予測を表します。' },
-                    { ja: '明日は雨が降るでしょう。', en: ['It', 'will', 'rain', 'tomorrow.'], exp: '「will」で単なる未来の予測を表します。' }
-                ]
-            },
-            {
-                id: 'L11_L12_passive',
-                title: 'Lesson 11-12: 受動態 (Passive Voice)',
-                desc: 'be動詞＋過去分詞（現在・過去・未来・進行形・完了形・群動詞・慣用表現）',
-                icon: 'fa-shield-halved',
-                color: 'from-teal-500 to-emerald-600',
-                questions: [
-                    { ja: 'この本は世界中で読まれています。', en: ['This', 'book', 'is', 'read', 'all', 'over', 'the', 'world.'], exp: '現在の受動態（be + 過去分詞）です。' },
-                    { ja: 'この古い寺は300年前に建てられました。', en: ['This', 'old', 'temple', 'was', 'built', 'three', 'hundred', 'years', 'ago.'], exp: '過去の受動態 (was built) です。' },
-                    { ja: 'その会議は来週開かれる予定です。', en: ['The', 'meeting', 'will', 'be', 'held', 'next', 'week.'], exp: '未来の受動態 (will be held) です。' },
-                    { ja: 'その星は肉眼で見ることができます。', en: ['The', 'star', 'can', 'be', 'seen', 'with', 'the', 'naked', 'eye.'], exp: '助動詞を伴う受動態 (can be seen) です。' },
-                    { ja: '新しいスタジアムが現在建設されているところです。', en: ['A', 'new', 'stadium', 'is', 'being', 'built', 'now.'], exp: '進行形受動態 (is being built) です。' },
-                    { ja: 'そのウェブサイトは最近更新されました。', en: ['This', 'website', 'has', 'been', 'updated', 'recently.'], exp: '完了形受動態 (has been updated) です。' },
-                    { ja: '彼は誕生日に素敵な時計をプレゼントされた。', en: ['He', 'was', 'given', 'a', 'nice', 'watch', 'on', 'his', 'birthday.'], exp: '第4文型の受動態です。' },
-                    { ja: 'その赤ちゃんは祖父にちなんでダイキと名付けられた。', en: ['The', 'baby', 'was', 'named', 'Daiki', 'after', 'his', 'grandfather.'], exp: '第5文型の受動態です。' },
-                    { ja: 'その赤ちゃんは彼女のおばさんによって世話をされた。', en: ['The', 'baby', 'was', 'taken', 'care', 'of', 'by', 'her', 'aunt.'], exp: '群動詞 (take care of) の受動態です。' },
-                    { ja: '富士山はきれいな雪で覆われています。', en: ['Mt.', 'Fuji', 'is', 'covered', 'with', 'beautiful', 'snow.'], exp: '慣用表現「be covered with ~」です。' },
-                    { ja: 'その知らせを聞いて私たちは皆驚いた。', en: ['We', 'were', 'all', 'surprised', 'at', 'the', 'news.'], exp: '慣用表現「be surprised at ~」です。' },
-                    { ja: 'その有名な歌手は若者たちに広く知られています。', en: ['The', 'famous', 'singer', 'is', 'well', 'known', 'to', 'young', 'people.'], exp: '慣用表現「be known to ~」です。' },
-                    { ja: 'この写真はどこで撮影されましたか。', en: ['Where', 'was', 'this', 'photo', 'taken?'], exp: '受動態の疑問文です。' },
-                    { ja: '彼は放課後居残りをさせられた。', en: ['He', 'was', 'made', 'to', 'stay', 'after', 'school.'], exp: '使役動詞の受動態 (be made to V) です。' },
-                    { ja: '英語はオーストラリアで話されていますか。', en: ['Is', 'English', 'spoken', 'in', 'Australia?'], exp: '受動態の Yes/No 疑問文です。' }
-                ]
-            },
-            {
-                id: 'L13_L15_infinitives',
-                title: 'Lesson 13-15: 不定詞 (Infinitives)',
-                desc: 'to+原形（名詞的・形容詞的・副詞的用法 / tell O to V 構文）',
-                icon: 'fa-link',
-                color: 'from-sky-500 to-indigo-600',
-                questions: [
-                    { ja: '私の夢は世界中を旅行することです。', en: ['My', 'dream', 'is', 'to', 'travel', 'around', 'the', 'world.'], exp: '不定詞の【名詞的用法】(to travel) です。' },
-                    { ja: '彼女は新しい洋服を買うために買い物に行った。', en: ['She', 'went', 'shopping', 'to', 'buy', 'new', 'clothes.'], exp: '目的を表す【副詞的用法】(to buy) です。' },
-                    { ja: '私はあなたに伝えるべき重要な知らせがあります。', en: ['I', 'have', 'important', 'news', 'to', 'tell', 'you.'], exp: '修飾する【形容詞的用法】(to tell) です。' },
-                    { ja: '彼は医者になるために一生懸命勉強しています。', en: ['He', 'studies', 'hard', 'to', 'become', 'a', 'doctor.'], exp: '目的を表す副詞的用法 (to become) です。' },
-                    { ja: '鍵をかけるのを忘れないでね。', en: ['Remember', 'to', 'lock', 'the', 'door.'], exp: 'remember + to V で「〜することを覚えている」です。' },
-                    { ja: 'その問題は自力で解くには難しすぎる。', en: ['The', 'problem', 'is', 'too', 'difficult', 'to', 'solve', 'alone.'], exp: 'too ... to V で「〜すぎてVできない」です。' },
-                    { ja: '私は何か冷たい飲み物が欲しい。', en: ['I', 'want', 'something', 'cold', 'to', 'drink.'], exp: 'something + 形容詞 + to V の語順です。' },
-                    { ja: '彼は親切にも私を手伝ってくれた。', en: ['He', 'was', 'kind', 'enough', 'to', 'help', 'me.'], exp: '形容詞 + enough to V の構文です。' },
-                    { ja: 'どこへ行けばいいか教えてください。', en: ['Please', 'tell', 'me', 'where', 'to', 'go.'], exp: '疑問詞 + to V (where to go) です。' },
-                    { ja: '母は私に部屋を掃除するように言った。', en: ['My', 'mother', 'told', 'me', 'to', 'clean', 'my', 'room.'], exp: 'tell + O + to V で「Oに〜するよう言う」構文です。' }
-                ]
-            }
-        ];
+    document.getElementById('lessonBadge').innerText = currentKey === 'L11_12' ? 'Lesson 11-12' : 'Lesson 13-15';
+    document.getElementById('qNumber').innerText = `Question ${currentIndex + 1} / ${list.length}`;
+    document.getElementById('jaText').innerText = item.ja;
+    document.getElementById('enText').innerText = item.en;
 
-        let state = {
-            currentUnit: null,
-            questions: [],
-            currentIndex: 0,
-            score: 0,
-            selectedWords: [],
-            availableWords: [],
-            userAnswersLog: [],
-            soundEnabled: true,
-            clearedUnitsCount: 0
-        };
+    // Reset answer box
+    document.getElementById('answerBox').style.display = 'none';
+    document.getElementById('toggleBtn').innerText = '解答を表示';
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // Progress bar update
+    const percent = ((currentIndex + 1) / list.length) * 100;
+    document.getElementById('progressBar').style.width = `${percent}%`;
 
-        function playSound(type) {
-            if (!state.soundEnabled) return;
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
+    // Button state
+    document.getElementById('prevBtn').disabled = currentIndex === 0;
+    document.getElementById('nextBtn').disabled = currentIndex === list.length - 1;
+}
 
-                const now = audioCtx.currentTime;
+function changeLesson() {
+    currentKey = document.getElementById('lessonSelect').value;
+    currentIndex = 0;
+    updateCard();
+}
 
-                if (type === 'click') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(400, now);
-                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
-                    gain.gain.setValueAtTime(0.15, now);
-                    gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
-                    osc.start(now);
-                    osc.stop(now + 0.05);
-                } else if (type === 'correct') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(523.25, now);
-                    osc.frequency.setValueAtTime(659.25, now + 0.08);
-                    osc.frequency.setValueAtTime(783.99, now + 0.16);
-                    gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
-                    osc.start(now);
-                    osc.stop(now + 0.35);
-                } else if (type === 'wrong') {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(220, now);
-                    osc.frequency.setValueAtTime(180, now + 0.12);
-                    gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
-                    osc.start(now);
-                    osc.stop(now + 0.3);
-                }
-            } catch (e) {
-                console.log('Audio error:', e);
-            }
-        }
+function toggleAnswer() {
+    const box = document.getElementById('answerBox');
+    const btn = document.getElementById('toggleBtn');
+    if (box.style.display === 'none' || box.style.display === '') {
+        box.style.display = 'block';
+        btn.innerText = '解答を非表示';
+    } else {
+        box.style.display = 'none';
+        btn.innerText = '解答を表示';
+    }
+}
 
-        function speakModelAnswer() {
-            const q = state.questions[state.currentIndex];
-            if (!q) return;
-            const text = q.en.join(' ');
-            
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'en-US';
-                utterance.rate = 0.9;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
+function nextQuestion() {
+    if (currentIndex < dataset[currentKey].length - 1) {
+        currentIndex++;
+        updateCard();
+    }
+}
 
-        function toggleSound() {
-            state.soundEnabled = !state.soundEnabled;
-            const icon = document.getElementById('sound-icon');
-            if (state.soundEnabled) {
-                icon.className = 'fa-solid fa-volume-high text-lg';
-            } else {
-                icon.className = 'fa-solid fa-volume-xmark text-lg text-slate-400';
-            }
-        }
+function prevQuestion() {
+    if (currentIndex > 0) {
+        currentIndex--;
+        updateCard();
+    }
+}
 
-        window.addEventListener('DOMContentLoaded', () => {
-            renderUnitList();
-            loadStats();
-            updateVisitorCount();
-        });
+// キーボード操作対応 (左右キーで移動、スペースキーで解答表示)
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') nextQuestion();
+    if (e.key === 'ArrowLeft') prevQuestion();
+    if (e.key === ' ') {
+        e.preventDefault();
+        toggleAnswer();
+    }
+});
 
-        function showUnitSelection() {
-            document.getElementById('unit-select-screen').classList.remove('hidden');
-            document.getElementById('quiz-screen').classList.add('hidden');
-            document.getElementById('quiz-screen').classList.remove('flex');
-            document.getElementById('result-screen').classList.add('hidden');
-            document.getElementById('feedback-modal').classList.add('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function renderUnitList() {
-            const grid = document.getElementById('unit-grid');
-            grid.innerHTML = '';
-
-            GRAMMAR_UNITS.forEach((unit) => {
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between group';
-                card.onclick = () => startQuiz(unit.id);
-
-                card.innerHTML = `
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between">
-                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br ${unit.color} text-white flex items-center justify-center text-xl shadow-md group-hover:scale-105 transition transform">
-                                <i class="fa-solid ${unit.icon}"></i>
-                            </div>
-                            <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">${unit.questions.length}問 収録</span>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-lg text-slate-800 group-hover:text-indigo-600 transition">${unit.title}</h3>
-                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">${unit.desc}</p>
-                        </div>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-indigo-600">
-                        <span>10問に挑戦する</span>
-                        <i class="fa-solid fa-chevron-right group-hover:translate-x-1 transition"></i>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        function startQuiz(unitId) {
-            const unit = GRAMMAR_UNITS.find(u => u.id === unitId);
-            if (!unit) return;
-
-            state.currentUnit = unit;
-            const shuffled = [...unit.questions].sort(() => Math.random() - 0.5);
-            state.questions = shuffled.slice(0, 10);
-            
-            state.currentIndex = 0;
-            state.score = 0;
-            state.userAnswersLog = [];
-
-            document.getElementById('unit-select-screen').classList.add('hidden');
-            document.getElementById('result-screen').classList.add('hidden');
-            document.getElementById('quiz-screen').classList.remove('hidden');
-            document.getElementById('quiz-screen').classList.add('flex');
-            
-            document.getElementById('quiz-unit-title').innerText = unit.title;
-
-            loadQuestion();
-        }
-
-        function loadQuestion() {
-            const q = state.questions[state.currentIndex];
-            state.selectedWords = [];
-
-            const wordsWithIds = q.en.map((word, idx) => ({ id: `${idx}-${word}`, text: word }));
-            state.availableWords = [...wordsWithIds].sort(() => Math.random() - 0.5);
-
-            document.getElementById('current-q-num').innerText = state.currentIndex + 1;
-            document.getElementById('japanese-text').innerText = q.ja;
-            
-            const progress = ((state.currentIndex + 1) / 10) * 100;
-            document.getElementById('progress-bar').style.width = `${progress}%`;
-
-            renderWords();
-        }
-
-        function renderWords() {
-            const answerZone = document.getElementById('answer-zone');
-            const wordPool = document.getElementById('word-pool');
-            const checkBtn = document.getElementById('check-btn');
-
-            answerZone.innerHTML = '';
-
-            if (state.selectedWords.length === 0) {
-                const placeholder = document.createElement('span');
-                placeholder.id = 'placeholder-text';
-                placeholder.className = 'text-slate-400 text-sm w-full text-center py-4 pointer-events-none';
-                placeholder.innerText = '下の単語をタップして文章を完成させてね';
-                answerZone.appendChild(placeholder);
-                checkBtn.disabled = true;
-            } else {
-                checkBtn.disabled = false;
-
-                state.selectedWords.forEach((item, index) => {
-                    const chip = createWordChip(item, () => deselectWord(index), 'bg-indigo-600 text-white shadow-md border-indigo-700');
-                    answerZone.appendChild(chip);
-                });
-            }
-
-            wordPool.innerHTML = '';
-            state.availableWords.forEach((item) => {
-                const chip = createWordChip(item, () => selectWord(item), 'bg-slate-100 hover:bg-indigo-50 text-slate-800 border-slate-200 hover:border-indigo-300');
-                wordPool.appendChild(chip);
-            });
-        }
-
-        function createWordChip(item, onClickHandler, extraClasses) {
-            const chip = document.createElement('button');
-            chip.className = `word-chip font-medium text-sm sm:text-base px-3.5 py-2 rounded-xl border transition flex items-center justify-center pop-in ${extraClasses}`;
-            chip.innerText = item.text;
-            chip.onclick = () => {
-                playSound('click');
-                onClickHandler();
-            };
-            return chip;
-        }
-
-        function selectWord(item) {
-            state.availableWords = state.availableWords.filter(w => w.id !== item.id);
-            state.selectedWords.push(item);
-            renderWords();
-        }
-
-        function deselectWord(index) {
-            const removed = state.selectedWords.splice(index, 1)[0];
-            state.availableWords.push(removed);
-            renderWords();
-        }
-
-        function clearAnswer() {
-            if (state.selectedWords.length === 0) return;
-            playSound('click');
-            state.availableWords = [...state.availableWords, ...state.selectedWords];
-            state.selectedWords = [];
-            renderWords();
-        }
-
-        function checkAnswer() {
-            const q = state.questions[state.currentIndex];
-            const userWords = state.selectedWords.map(w => w.text);
-            const userSentence = userWords.join(' ');
-            const modelSentence = q.en.join(' ');
-
-            const isCorrect = userSentence === modelSentence;
-
-            if (isCorrect) {
-                state.score++;
-                playSound('correct');
-            } else {
-                playSound('wrong');
-            }
-
-            state.userAnswersLog.push({
-                question: q,
-                userSentence: userSentence,
-                isCorrect: isCorrect
-            });
-
-            showFeedbackModal(isCorrect, userSentence, modelSentence, q.exp);
-        }
-
-        function showFeedbackModal(isCorrect, userSentence, modelSentence, explanation) {
-            const modal = document.getElementById('feedback-modal');
-            const iconBox = document.getElementById('modal-icon');
-            const title = document.getElementById('modal-title');
-            const subtitle = document.getElementById('modal-subtitle');
-            const userAnsBox = document.getElementById('user-ans-box');
-            const modalUserAns = document.getElementById('modal-user-ans');
-            const modalModelAns = document.getElementById('modal-model-ans');
-            const modalExp = document.getElementById('modal-explanation');
-
-            if (isCorrect) {
-                iconBox.className = 'w-12 h-12 rounded-2xl flex items-center justify-center text-white text-2xl font-bold bg-emerald-500 shadow-emerald-200';
-                iconBox.innerHTML = '<i class="fa-solid fa-check"></i>';
-                title.innerText = '正解です！ 🎉';
-                title.className = 'text-2xl font-black text-emerald-600';
-                subtitle.innerText = 'パーフェクト！この調子で進みましょう。';
-                userAnsBox.classList.add('hidden');
-            } else {
-                iconBox.className = 'w-12 h-12 rounded-2xl flex items-center justify-center text-white text-2xl font-bold bg-rose-500 shadow-rose-200';
-                iconBox.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-                title.innerText = 'おしい！ ざんねん…';
-                title.className = 'text-2xl font-black text-rose-600';
-                subtitle.innerText = '模範解答を確認して文法チェックをしよう。';
-                
-                modalUserAns.innerText = userSentence;
-                userAnsBox.classList.remove('hidden');
-            }
-
-            modalModelAns.innerText = modelSentence;
-            modalExp.innerText = explanation;
-
-            modal.classList.remove('hidden');
-
-            if (isCorrect) {
-                setTimeout(speakModelAnswer, 300);
-            }
-        }
-
-        function nextQuestion() {
-            document.getElementById('feedback-modal').classList.add('hidden');
-            state.currentIndex++;
-
-            if (state.currentIndex >= state.questions.length) {
-                finishQuiz();
-            } else {
-                loadQuestion();
-            }
-        }
-
-        function finishQuiz() {
-            document.getElementById('quiz-screen').classList.add('hidden');
-            document.getElementById('quiz-screen').classList.remove('flex');
-            document.getElementById('result-screen').classList.remove('hidden');
-
-            document.getElementById('result-unit-title').innerText = state.currentUnit.title;
-            document.getElementById('final-score').innerText = state.score;
-
-            const starContainer = document.getElementById('star-rating');
-            starContainer.innerHTML = '';
-            let starsCount = 1;
-            if (state.score >= 9) starsCount = 3;
-            else if (state.score >= 6) starsCount = 2;
-
-            for (let i = 0; i < 3; i++) {
-                const star = document.createElement('i');
-                if (i < starsCount) {
-                    star.className = 'fa-solid fa-star text-amber-400';
-                } else {
-                    star.className = 'fa-regular fa-star text-slate-300';
-                }
-                starContainer.appendChild(star);
-            }
-
-            state.clearedUnitsCount++;
-            localStorage.setItem('gm_cleared_count', state.clearedUnitsCount);
-            updateStatsUI();
-
-            renderReviewList();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function renderReviewList() {
-            const list = document.getElementById('review-list');
-            list.innerHTML = '';
-
-            state.userAnswersLog.forEach((log, i) => {
-                const item = document.createElement('div');
-                item.className = `p-4 rounded-2xl border text-sm space-y-2 ${log.isCorrect ? 'bg-emerald-50/50 border-emerald-200' : 'bg-rose-50/50 border-rose-200'}`;
-
-                item.innerHTML = `
-                    <div class="flex items-center justify-between font-bold">
-                        <span class="text-slate-500">Q${i + 1}. ${log.question.ja}</span>
-                        <span class="${log.isCorrect ? 'text-emerald-600' : 'text-rose-600'} text-xs px-2.5 py-1 rounded-full bg-white border">
-                            ${log.isCorrect ? '<i class="fa-solid fa-check mr-1"></i>正解' : '<i class="fa-solid fa-xmark mr-1"></i>不正解'}
-                        </span>
-                    </div>
-                    ${!log.isCorrect ? `<div class="text-xs text-rose-600"><span class="font-bold">あなたの解答:</span> ${log.userSentence}</div>` : ''}
-                    <div class="slate-800 font-bold"><span class="text-xs font-semibold text-slate-400 block">正解英文:</span>${log.question.en.join(' ')}</div>
-                    <p class="text-xs text-slate-600 bg-white/80 p-2.5 rounded-xl border border-slate-100 mt-1">${log.question.exp}</p>
-                `;
-                list.appendChild(item);
-            });
-        }
-
-        function retryCurrentUnit() {
-            if (state.currentUnit) {
-                startQuiz(state.currentUnit.id);
-            }
-        }
-
-        function loadStats() {
-            const saved = localStorage.getItem('gm_cleared_count');
-            if (saved) {
-                state.clearedUnitsCount = parseInt(saved, 10);
-            }
-            updateStatsUI();
-        }
-
-        function updateStatsUI() {
-            document.getElementById('total-cleared').innerText = state.clearedUnitsCount;
-        }
-    </script>
+// 初期化
+updateCard();
+</script>
 </body>
 </html>
